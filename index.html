@@ -777,14 +777,7 @@ function renderTrip(){
     <section class="grid2">${travelers.map(t=>travCard(t)).join("")}
       <div class="card trav"><h3>Add a traveler</h3><label for="newName">Name<input id="newName" placeholder="Name" value="${esc(newNameDraft)}" enterkeyhint="done"></label><button class="btn primary" id="addTrav" ${db&&canWrite?"":"disabled"}>Add</button></div>
     </section>
-    <section class="card"><h3>Trip rules</h3><ul class="rules">
-      <li>Rental car the whole trip. Arrive and leave via Keflavík (KEF).</li>
-      <li>No single drive over 3 hours once everyone is here; options that break it turn red.</li>
-      <li>Dinners high-end, breakfast and lunch average. Lodging up to about $700–800 a night for the right place.</li>
-      <li>Hot springs every day possible, but not the Blue Lagoon. No trip east for reindeer; you saw them in February.</li>
-      <li>Price marks: $ under $25 pp · $$ $25–80 · $$$ $80–200 · $$$$ above. Lodging: $$ under $300 · $$$ $300–600 · $$$$ $600+ a night. Rough October guides; check when booking.</li>
-    </ul></section>
-    <section class="card"><h3>Packing list for this forecast</h3>
+        <section class="card"><h3>Packing list for this forecast</h3>
       <p class="lede" style="margin:0 0 8px">Highs 2–11 °C (36–52 °F), lows down to −2 °C (28 °F), two very wet days (Oct 8 and 12) and one dry, clear, cold one (Oct 10).</p>
       <ul class="rules">
         <li><b>Shell:</b> a fully waterproof, hooded jacket and rain pants each. This matters more than anything else on the list.</li>
