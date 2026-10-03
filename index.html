@@ -71,6 +71,8 @@ h3{font-family:var(--display);font-weight:800;font-size:20px;margin:0;text-trans
 .paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .path{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:6px;align-content:start}
 .path .k{font-family:var(--display);font-weight:800;font-size:15px;color:var(--sign);letter-spacing:.06em}
+.path.build{border-style:dashed}
+.path.build.on{border-style:solid;border-color:var(--sign)}
 .path p{margin:0;font-size:13.5px;color:var(--muted)}
 .path .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .btn{border:1px solid var(--line);background:var(--surface);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700}
@@ -614,6 +616,7 @@ let travelers = [];   // from db
 let picks = {};       // key day|slot|traveler -> optionId
 let db = null, canWrite = true;
 let view = "day", dayId = DAYS[0].id;
+const building = {};
 let me = null;
 try{ me = localStorage.getItem("ice26-me"); const v=localStorage.getItem("ice26-view"); if(v) view=v; const d=localStorage.getItem("ice26-day"); if(d && DAYS.some(x=>x.id===d)) dayId=d; }catch(e){}
 
@@ -692,13 +695,26 @@ function renderDay(){
     </section>
     ${renderWx(d)}
     <section>
-      <div class="slothead"><h3>Pick a path</h3><span class="eyebrow">sets every slot below</span></div>
+      <div class="slothead"><h3>Pick a path</h3><span class="eyebrow">or build your own</span></div>
       <div class="paths">${d.paths.map(p=>`<div class="path"><span class="k">PATH ${p.k}</span><strong>${esc(p.name)}</strong><p>${esc(p.d)}</p>
         <div class="acts"><button class="btn primary" data-path="${p.k}" data-scope="me" ${db&&canWrite&&mt&&present(mt,d.id)?"":"disabled"}>${mt?"Take it as "+esc(mt.name):"Choose who you are first"}</button>
-        <button class="btn" data-path="${p.k}" data-scope="all" ${db&&canWrite&&ppl.length?"":"disabled"}>Everyone</button></div></div>`).join("")}</div>
+        <button class="btn" data-path="${p.k}" data-scope="all" ${db&&canWrite&&ppl.length?"":"disabled"}>Everyone</button></div></div>`).join("")}
+        <div class="path build ${building[d.id]?"on":""}"><span class="k">BUILD YOUR OWN</span><strong>Mix and match</strong><p>Choose each part of the day yourself: activities, lunch, dinner, the night out and where to sleep.</p>
+          <div class="acts"><button class="btn ${building[d.id]?"":"primary"}" data-build="${d.id}" aria-expanded="${!!building[d.id]}">${building[d.id]?"Hide the options":"Start building"}</button></div></div>
+      </div>
     </section>
-    ${SLOTS.filter(s=>d.opts[s.id]).map(s=>`<section class="slot"><div class="slothead"><h3>${s.name}</h3><span class="eyebrow">${s.time}</span></div>
-      <div class="opts">${d.opts[s.id].map(o=>renderOpt(OPT[o.id],d,ppl)).join("")}</div></section>`).join("")}`;
+    ${building[d.id] ? SLOTS.filter(s=>d.opts[s.id]).map(s=>`<section class="slot"><div class="slothead"><h3>${s.name}</h3><span class="eyebrow">${SLOT_KIND[s.id]} · ${s.time}</span></div>
+      <div class="opts">${d.opts[s.id].map(o=>renderOpt(OPT[o.id],d,ppl)).join("")}</div></section>`).join("")
+      + `<section class="slot"><button class="btn primary" data-build="${d.id}" data-done="1">Done building</button></section>`
+      : renderMyDay(d, mt)}`;
+}
+const SLOT_KIND = {morning:"Activity", midday:"Lunch or activity", afternoon:"Activity", dinner:"Dinner", evening:"Night out", stay:"Where to sleep"};
+function renderMyDay(d, mt){
+  if(!mt || !present(mt,d.id)) return `<section class="slot"><p class="empty" style="margin:0">${mt?esc(mt.name)+" isn't here this day.":"Choose who you are at the top to see your day."}</p></section>`;
+  const rows = SLOTS.filter(s=>d.opts[s.id]).map(s=>{ const o = OPT[picks[pickKey(d.id,s.id,mt.id)]];
+    return `<tr><td class="slotc">${s.name}<span>${s.time}</span></td><td>${o?`<div class="cell"><b>${esc(o.t)}</b><small>${esc(o.where||"")}</small></div>`:`<span class="empty">Not picked yet</span>`}</td></tr>`; }).join("");
+  return `<section class="slot"><div class="slothead"><h3>${esc(mt.name)}'s day</h3><span class="eyebrow">your picks</span></div>
+    <div class="sched"><table style="min-width:0"><tbody>${rows}</tbody></table></div></section>`;
 }
 
 function dayLocs(d){ const seen=[]; Object.values(d.opts).flat().forEach(o=>{ const l=(LK[o.id]||"rvk").split(" ")[0]; if(!seen.includes(l)) seen.push(l); }); return seen; }
@@ -856,6 +872,12 @@ document.addEventListener("click", async ev=>{
   const b = ev.target.closest("button,a"); if(!b) return;
   if(b.dataset.day){ dayId=b.dataset.day; if(view==="trip") view="day"; persist(); render(); scrollTo({top:0}); return; }
   if(b.id&&b.id.startsWith("tab-")){ view=b.id.slice(4); persist(); render(); return; }
+  if(b.dataset.build){
+    const id=b.dataset.build; building[id]=!building[id]; render();
+    if(building[id]) document.querySelector(".slot")?.scrollIntoView({behavior:"smooth",block:"start"});
+    else if(b.dataset.done) document.querySelector(".paths")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
   if(b.dataset.goto){ dayId=b.dataset.goto; view="day"; persist(); render(); scrollTo({top:0}); return; }
   if(!db||!canWrite) return;
   if(b.dataset.pick){
