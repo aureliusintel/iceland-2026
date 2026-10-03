@@ -829,7 +829,7 @@ function saveTraveler(t){
   pending[t.id] = setTimeout(async()=>{
     delete pending[t.id]; inflight++;
     try{ await api("/api/traveler",{method:"POST",body:JSON.stringify(t)}); }catch(e){ handleErr(e); }
-    finally{ inflight--; }
+    finally{ inflight--; setTimeout(()=>{ if(needsRender && !isEditing()){ needsRender=false; render(); } }, 50); }
   },600);
 }
 // True while someone is typing or a traveler change hasn't reached the server yet.
@@ -895,7 +895,8 @@ document.addEventListener("focusout", ()=>{
   setTimeout(()=>{ if(needsRender && !isEditing()){ needsRender=false; render(); } }, 250);
 });
 document.addEventListener("change", ev=>{
-  if(ev.target.dataset.field && ev.target.type!=="text" && ev.target.type!=="number") render();
+  // Don't redraw the form under a date/time picker; update the day strip now, the rest when they leave the field.
+  if(ev.target.dataset.field){ renderStrip(); needsRender = true; }
   if(ev.target.id==="meSel"){ me=ev.target.value||null; persist(); render(); }
 });
 function persist(){ try{ localStorage.setItem("ice26-view",view); localStorage.setItem("ice26-day",dayId); if(me) localStorage.setItem("ice26-me",me); else localStorage.removeItem("ice26-me"); }catch(e){} }
