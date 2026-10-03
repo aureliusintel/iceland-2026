@@ -629,6 +629,9 @@ function here(day){ return travelers.filter(t=>present(t,day)); }
 function fullGroup(day){ return travelers.length>0 && here(day).length===travelers.length; }
 function avatar(t,size){ return `<span class="av" style="background:${colorOf(t)}${size?`;width:${size}px;height:${size}px`:""}" aria-hidden="true">${esc((t.name||"?")[0])}</span>`; }
 function pickKey(d,s,t){ return d+"|"+s+"|"+t; }
+const SINGLE = {stay:1}; // one place to sleep; everything else can hold several picks
+function picksOf(d,s,t){ return picks[pickKey(d,s,t)] || []; }
+function hasPick(d,s,t,o){ return picksOf(d,s,t).includes(o); }
 
 /* ---------- Render ---------- */
 function renderMe(){
@@ -656,7 +659,7 @@ function renderOpt(o, d, ppl){
   const [loc,kind] = (LK[o.id]||"rvk city").split(" ");
   const w = wxFor(loc, d.id); const wr = wear(kind, w); const flag = wxFlag(kind, w);
   const over = o.drive>MAX_DRIVE && fullGroup(d.id);
-  const mineSel = me && picks[pickKey(d.id,o.slot,me)]===o.id;
+  const mineSel = me && hasPick(d.id,o.slot,me,o.id);
   const fits = fitsFor(o, ppl);
   return `<article class="opt ${mineSel?"mine":""}">
     <div class="meta">
@@ -677,7 +680,7 @@ function renderOpt(o, d, ppl){
     ${fits.length?`<div class="fits">Fits ${fits.map(t=>avatar(t,16)+esc(t.name)).join(", ")}</div>`:""}
     <div class="links"><a href="${mapUrl(o)}" target="_blank" rel="noopener">Map</a>${o.link?`<a href="${esc(o.link)}" target="_blank" rel="noopener">Book / browse</a>`:""}</div>
     <div class="pickrow"><span class="lbl">Pick:</span>${ppl.map(t=>{
-      const on = picks[pickKey(d.id,o.slot,t.id)]===o.id;
+      const on = hasPick(d.id,o.slot,t.id,o.id);
       return `<button class="pk" style="color:${colorOf(t)}" aria-pressed="${on}" data-pick="${o.id}" data-t="${esc(t.id)}" ${canWrite&&db?"":"disabled"}>${avatar(t)}<span style="color:var(--ink)">${esc(t.name)}</span></button>`;
     }).join("")}</div>
   </article>`;
@@ -703,7 +706,7 @@ function renderDay(){
           <div class="acts"><button class="btn ${building[d.id]?"":"primary"}" data-build="${d.id}" aria-expanded="${!!building[d.id]}">${building[d.id]?"Hide the options":"Start building"}</button></div></div>
       </div>
     </section>
-    ${building[d.id] ? SLOTS.filter(s=>d.opts[s.id]).map(s=>`<section class="slot"><div class="slothead"><h3>${s.name}</h3><span class="eyebrow">${SLOT_KIND[s.id]} · ${s.time}</span></div>
+    ${building[d.id] ? SLOTS.filter(s=>d.opts[s.id]).map(s=>`<section class="slot"><div class="slothead"><h3>${s.name}</h3><span class="eyebrow">${SLOT_KIND[s.id]} · ${SINGLE[s.id]?"pick one":"pick as many as you like"} · ${s.time}</span></div>
       <div class="opts">${d.opts[s.id].map(o=>renderOpt(OPT[o.id],d,ppl)).join("")}</div></section>`).join("")
       + `<section class="slot"><button class="btn primary" data-build="${d.id}" data-done="1">Done building</button></section>`
       : renderMyDay(d, mt)}`;
@@ -711,8 +714,8 @@ function renderDay(){
 const SLOT_KIND = {morning:"Activity", midday:"Lunch or activity", afternoon:"Activity", dinner:"Dinner", evening:"Night out", stay:"Where to sleep"};
 function renderMyDay(d, mt){
   if(!mt || !present(mt,d.id)) return `<section class="slot"><p class="empty" style="margin:0">${mt?esc(mt.name)+" isn't here this day.":"Choose who you are at the top to see your day."}</p></section>`;
-  const rows = SLOTS.filter(s=>d.opts[s.id]).map(s=>{ const o = OPT[picks[pickKey(d.id,s.id,mt.id)]];
-    return `<tr><td class="slotc">${s.name}<span>${s.time}</span></td><td>${o?`<div class="cell"><b>${esc(o.t)}</b><small>${esc(o.where||"")}</small></div>`:`<span class="empty">Not picked yet</span>`}</td></tr>`; }).join("");
+  const rows = SLOTS.filter(s=>d.opts[s.id]).map(s=>{ const os = picksOf(d.id,s.id,mt.id).map(id=>OPT[id]).filter(Boolean);
+    return `<tr><td class="slotc">${s.name}<span>${s.time}</span></td><td>${os.length?`<div class="cell" style="gap:6px">${os.map(o=>`<div><b>${esc(o.t)}</b><br><small>${esc(o.where||"")}</small></div>`).join("")}</div>`:`<span class="empty">Not picked yet</span>`}</td></tr>`; }).join("");
   return `<section class="slot"><div class="slothead"><h3>${esc(mt.name)}'s day</h3><span class="eyebrow">your picks</span></div>
     <div class="sched"><table style="min-width:0"><tbody>${rows}</tbody></table></div></section>`;
 }
@@ -720,7 +723,7 @@ function renderMyDay(d, mt){
 function dayLocs(d){ const seen=[]; Object.values(d.opts).flat().forEach(o=>{ const l=(LK[o.id]||"rvk").split(" ")[0]; if(!seen.includes(l)) seen.push(l); }); return seen; }
 function packFor(d, tid){
   const items = new Set();
-  SLOTS.forEach(s=>{ const oid = tid && picks[pickKey(d.id,s.id,tid)]; if(!oid) return; const [loc,kind]=(LK[oid]||"rvk city").split(" "); (wear(kind, wxFor(loc,d.id))||[]).forEach(x=>items.add(x)); });
+  SLOTS.forEach(s=>{ if(!tid) return; picksOf(d.id,s.id,tid).forEach(oid=>{ const [loc,kind]=(LK[oid]||"rvk city").split(" "); (wear(kind, wxFor(loc,d.id))||[]).forEach(x=>items.add(x)); }); });
   items.delete("casual is fine");
   if(items.has("waterproof jacket and rain pants")||items.has("waterproof, windproof shell")) items.delete("packable rain jacket for the walk");
   return [...items];
@@ -764,15 +767,19 @@ function renderSchedDay(d){
   const ppl = here(d.id);
   if(!ppl.length) return `<p class="empty">No travelers on this day.</p>`;
   const rows = SLOTS.filter(s=>d.opts[s.id]).map(s=>{
-    const ids = ppl.map(t=>picks[pickKey(d.id,s.id,t.id)]).filter(Boolean);
-    const uniq = [...new Set(ids)];
-    const agree = ids.length===ppl.length && uniq.length===1;
-    const flag = ids.length===0 ? "" : agree ? `<span class="same">Together</span>` : uniq.length>1 ? `<span class="split">Split</span>` : `<span class="split">Waiting on picks</span>`;
+    const sets = ppl.map(t=>picksOf(d.id,s.id,t.id).slice().sort().join(","));
+    const filled = sets.filter(Boolean);
+    const uniq = [...new Set(filled)];
+    const agree = filled.length===ppl.length && uniq.length===1;
+    const flag = filled.length===0 ? "" : agree ? `<span class="same">Together</span>` : uniq.length>1 ? `<span class="split">Split</span>` : `<span class="split">Waiting on picks</span>`;
     return `<tr><td class="slotc">${s.name}<span>${s.time}</span>${flag}</td>${ppl.map(t=>{
-      const o = OPT[picks[pickKey(d.id,s.id,t.id)]];
-      let wl="";
-      if(o){ const [loc,kind]=(LK[o.id]||"rvk city").split(" "); const w=wxFor(loc,d.id); const wr=wear(kind,w); wl = (kind!=="stay"&&kind!=="rest"?`${w.hi}°/${w.lo}°C, ${w.mm!=null?w.mm+" mm":"avg"}`:"") + (wr?" · Wear: "+wr.slice(0,3).join(", "):""); }
-      return `<td>${o?`<div class="cell"><b>${esc(o.t)}</b><small>${esc(o.where||"")}${o.drive?" · "+fmtDrive(o.drive):""}</small>${wl?`<span class="w">${esc(wl)}</span>`:""}</div>`:`<span class="empty">Not picked</span>`}</td>`;
+      const os = picksOf(d.id,s.id,t.id).map(id=>OPT[id]).filter(Boolean);
+      if(!os.length) return `<td><span class="empty">Not picked</span></td>`;
+      return `<td><div class="cell" style="gap:8px">${os.map(o=>{
+        const [loc,kind]=(LK[o.id]||"rvk city").split(" "); const w=wxFor(loc,d.id); const wr=wear(kind,w);
+        const wl = (kind!=="stay"&&kind!=="rest"?`${w.hi}°/${w.lo}°C, ${w.mm!=null?w.mm+" mm":"avg"}`:"") + (wr?" · Wear: "+wr.slice(0,3).join(", "):"");
+        return `<div class="cell"><b>${esc(o.t)}</b><small>${esc(o.where||"")}${o.drive?" · "+fmtDrive(o.drive):""}</small>${wl?`<span class="w">${esc(wl)}</span>`:""}</div>`;
+      }).join("")}</div></td>`;
     }).join("")}</tr>`;
   }).join("");
   return `<div class="sched"><table><thead><tr><th>${d.dow} ${d.label}</th>${ppl.map(t=>`<th><span class="chip" style="border:0;padding:0;background:none">${avatar(t)}${esc(t.name)}</span></th>`).join("")}</tr></thead>
@@ -780,7 +787,7 @@ function renderSchedDay(d){
 }
 function renderSched(){
   const d = DAYS.find(x=>x.id===dayId);
-  const totals = DAYS.map(x=>{ const ppl=here(x.id); const n=SLOTS.filter(s=>x.opts[s.id]).length*ppl.length; let got=0; ppl.forEach(t=>SLOTS.forEach(s=>{ if(picks[pickKey(x.id,s.id,t.id)]) got++; })); return {x,got,n}; });
+  const totals = DAYS.map(x=>{ const ppl=here(x.id); const n=SLOTS.filter(s=>x.opts[s.id]).length*ppl.length; let got=0; ppl.forEach(t=>SLOTS.forEach(s=>{ if(picksOf(x.id,s.id,t.id).length) got++; })); return {x,got,n}; });
   return `<section class="dayhead"><div class="eyebrow">Schedule</div><h2>${d.dow} ${d.label}: ${esc(d.title)}</h2>
     <p class="lede">Each column is one person's picks. "Split" means you've chosen different things for that slot, which is fine if you plan to split up.</p></section>
     <section>${renderSchedDay(d)}</section>
@@ -827,12 +834,18 @@ async function api(path, opts={}){
   if(!r.ok) throw {code:"server", status:r.status};
   return r.json();
 }
-async function writePick(day,slot,tid,optId){
-  const key = pickKey(day,slot,tid), prev = picks[key];
-  if(optId) picks[key]=optId; else delete picks[key];
-  render();
-  try{ await api("/api/pick",{method:"POST",body:JSON.stringify({day,slot,traveler:tid,option:optId||null})}); }
-  catch(e){ if(prev) picks[key]=prev; else delete picks[key]; handleErr(e); render(); }
+// action: "add" | "remove" | "replace" (replace = this option only; option null clears the slot)
+async function writePick(day,slot,tid,optId,action){
+  const key = pickKey(day,slot,tid), prev = (picks[key]||[]).slice();
+  let next = prev.slice();
+  if(action==="add") next = SINGLE[slot] ? [optId] : [...new Set([...prev,optId])];
+  else if(action==="remove") next = prev.filter(x=>x!==optId);
+  else next = optId ? [optId] : [];
+  if(next.length) picks[key]=next; else delete picks[key];
+  inflight++; render();
+  try{ await api("/api/pick",{method:"POST",body:JSON.stringify({day,slot,traveler:tid,option:optId||null,action})}); }
+  catch(e){ if(prev.length) picks[key]=prev; else delete picks[key]; handleErr(e); render(); }
+  finally{ inflight--; }
 }
 function handleErr(e){
   if(e && e.code==="auth") return;
@@ -882,13 +895,13 @@ document.addEventListener("click", async ev=>{
   if(!db||!canWrite) return;
   if(b.dataset.pick){
     const o=OPT[b.dataset.pick], tid=b.dataset.t;
-    const cur = picks[pickKey(o.day,o.slot,tid)];
-    await writePick(o.day,o.slot,tid, cur===o.id?null:o.id); return;
+    const on = hasPick(o.day,o.slot,tid,o.id);
+    await writePick(o.day,o.slot,tid,o.id, on?"remove":"add"); return;
   }
   if(b.dataset.path){
     const d=DAYS.find(x=>x.id===dayId), p=d.paths.find(x=>x.k===b.dataset.path);
     const who = b.dataset.scope==="all" ? here(d.id).map(t=>t.id) : [me];
-    for(const tid of who) for(const [s,oid] of Object.entries(p.set)) await writePick(d.id,s,tid,oid);
+    for(const tid of who) for(const [s,oid] of Object.entries(p.set)) await writePick(d.id,s,tid,oid,"replace");
     return;
   }
   if(b.dataset.int){
@@ -933,7 +946,8 @@ async function load(){
   const editing = isEditing();
   // Never overwrite travelers someone is editing; picks and weather can always refresh.
   if(!editing) travelers = st.travelers;
-  const next={}; st.picks.forEach(x=>{ next[pickKey(x.day,x.slot,x.traveler)]=x.option; }); picks=next;
+  const next={}; st.picks.forEach(x=>{ const k=pickKey(x.day,x.slot,x.traveler); (next[k] ||= []).includes(x.option) || next[k].push(x.option); });
+  if(!inflight) picks=next;  // don't clobber a pick that's still saving
   if(st.weather) LIVE = st.weather;
   refreshState = st.refreshing ? "refreshing now" : "";
   if(me && !travelers.some(t=>t.id===me)) me=null;
