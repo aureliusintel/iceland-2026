@@ -588,6 +588,7 @@ function wear(kind, w){
     dinner:["smart casual: dark jeans and a nice sweater"],
     fine:["smart casual is right even at Michelin places; no jacket or tie needed"],
     night:["layers you can shed (bars run warm)","a coat you can check","comfortable shoes, ID"],
+    boat:["warm hat and gloves: it is colder on the water","waterproof jacket over your layers","motion-sickness tablets if you need them"],
     aurora:["everything warm: insulated jacket, hat, gloves, warm boots","thermos of something hot","phone in night mode, small tripod"]
   };
   (K[kind]||[]).forEach(x=>x&&out.push(x));
@@ -608,6 +609,150 @@ const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">
 const PALETTE = ["--bob","--amanda","--eva","--t4","--t5"];
 const mapUrl = o => "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(o.t+", "+(o.where||"")+", Iceland");
 const fmtDrive = m => m>=60 ? Math.floor(m/60)+" h"+(m%60?" "+(m%60):"") : m+" min";
+/* ---------- More options for Build your own ---------- */
+// O(id, title, where, "loc kind", "tags", price, description, drive?, road?, from?, warn?)
+const O = (id,t,where,lk,tags,p,d,drive=0,road="",from="",warn="") => ({id,t,where,lk,tags:tags?tags.split(" "):[],p,d,drive,road,from,...(warn?{warn}:{})});
+
+// Reykjavík pools, reused on city days with day-specific ids
+const RVK_CAFE = s => [
+  O("rr"+s,"Reykjavík Roasters","Kárastígur 1","rvk cafe","coffee","$","The city's best-known specialty roaster. Flat whites and cardamom buns."),
+  O("gk"+s,"Grái Kötturinn","Hverfisgata 16a","rvk cafe","coffee dining","$$","Basement diner with big American-style breakfasts: pancakes, bacon, eggs."),
+  O("mk"+s,"Mokka Kaffi","Skólavörðustígur 3a","rvk cafe","coffee culture","$","Reykjavík's oldest café (1958). Get the waffles with jam and cream.")
+];
+const RVK_LUNCH = s => [
+  O("isf"+s,"Icelandic Street Food","Lækjargata 8","rvk meal","dining","$","Lamb or shellfish soup in a bread bowl, with free refills."),
+  O("sb"+s,"Sægreifinn (Sea Baron)","Geirsgata 8, Old Harbour","rvk meal","dining","$$","Harbour shack famous for its lobster soup."),
+  O("kv"+s,"Kaffivagninn","Grandagarður 10","rvk meal","dining","$$","One of the oldest restaurants in Iceland, on the harbour. Fish and chips or plokkfiskur."),
+  O("ms"+s,"Messinn","Lækjargata 6b","rvk meal","dining","$$","Fish served in sizzling pans with potatoes. Very popular at lunch."),
+  O("gm"+s,"Grandi Mathöll","Grandagarður 16","rvk meal","dining","$$","Harbour food hall in an old fish factory, close to FlyOver and the whale museum.")
+];
+const RVK_DO = (s, fromLabel) => [
+  O("ww"+s,"Whale watching from the Old Harbour","Ægisgarður, Old Harbour","rvk boat","animals nature","$$$","About 3 hours on Faxaflói bay. Minke whales, dolphins and porpoises are common in October; warm overalls are provided."),
+  O("fo"+s,"FlyOver Iceland","Fiskislóð 43, Grandi","rvk indoor","sights","$$","Flight-ride over Iceland's landscapes with wind, mist and scent. About 35 minutes."),
+  O("wi"+s,"Whales of Iceland exhibition","Fiskislóð 23, Grandi","rvk indoor","animals culture","$$","Life-size models of 23 whale species. Good rainy-day stop."),
+  O("hp"+s,"Harpa and the Sun Voyager","Harbour front","rvk walk","sights culture","Free","Walk through the glass-walled concert hall, then along the shore to the Sun Voyager sculpture."),
+  O("nm"+s,"National Museum of Iceland","Suðurgata 41","rvk indoor","culture","$$","Settlement to today in one well-done permanent exhibition. About 1.5 hours."),
+  O("lp"+s,"Laugardalslaug geothermal pool","Sundlaugavegur 30","rvk lagoon","hotsprings","$","Where locals soak: hot pots, a steam bath and a big outdoor pool for a few dollars. Shower without a swimsuit first; that's the rule.",10,"Local",fromLabel||"Downtown")
+];
+const RVK_DINNER = s => [
+  O("mt"+s,"Matarkjallarinn","Aðalstræti 2","rvk fine","dining","$$$","Candlelit cellar with live piano; the tasting menu is the move."),
+  O("ko"+s,"Kol","Skólavörðustígur 40","rvk dinner","dining","$$$","Wood-fired grill and excellent cocktails. Lively, a good group pick."),
+  O("rk"+s,"Rok","Frakkastígur 26a","rvk dinner","dining","$$$","Small plates in a turf-roofed house across from Hallgrímskirkja."),
+  O("ap"+s,"Apotek Kitchen + Bar","Austurstræti 16","rvk dinner","dining nightlife","$$$","Nordic-Latin plates in an old pharmacy; the bar turns into a cocktail spot later."),
+  O("tb"+s,"Tapas Barinn","Vesturgata 3b","rvk dinner","dining","$$$","Icelandic tasting menu as tapas: puffin, lamb, Arctic char and brennivín."),
+  O("ff"+s,"Fiskfélagið (Fish Company)","Vesturgata 2a","rvk fine","dining","$$$$","Seafood tasting menu in a stone cellar by the harbour.")
+];
+const RVK_NIGHT = s => [
+  O("rn"+s,"Röntgen","Hverfisgata 12","rvk night","nightlife","$$","Small, popular bar with DJs on weekends. Locals' favourite."),
+  O("sk"+s,"Skuggabaldur jazz bar","Pósthússtræti 9","rvk night","nightlife culture","$$","Live jazz most nights in a low-lit room. Easy first stop."),
+  O("lb"+s,"Lebowski Bar","Laugavegur 20a","rvk night","nightlife","$$","Bowling-alley theme, White Russians, dancing after midnight on weekends."),
+  O("ga"+s,"Gaukurinn","Tryggvagata 22","rvk night","nightlife","$","Live music, comedy and karaoke nights. Check the night's lineup."),
+  O("sn"+s,"Session Craft Bar","Bankastræti 14","rvk night","nightlife","$$","Icelandic craft beer on tap. Relaxed spot for a slower night."),
+  O("sl"+s,"Slippbarinn","Mýrargata 2, Reykjavík Marina","rvk night","nightlife dining","$$","Harbour-side cocktail bar with a great happy hour.")
+];
+
+const GOLDEN_LUNCH = s => [
+  O("mi"+s,"Mika","Reykholt, Golden Circle","golden meal","dining","$$","Chocolatier and restaurant; the langoustine pizza is famous."),
+  O("fs"+s,"Flúðasveppir Farmers Bistro","Flúðir","golden meal","dining culture","$$","Mushroom farm bistro: bottomless mushroom soup and fresh bread."),
+  O("gc"+s,"Gullfoss Café","At Gullfoss","golden meal","dining","$","Icelandic lamb soup with refills, right at the falls.")
+];
+const GOLDEN_DO = s => [
+  O("fx"+s,"Faxi waterfall","Off Rte 35, near Reykholt","golden view","waterfalls nature","Small fee","Wide, quiet waterfall with a salmon ladder. Five minutes from the car.",15,"Rte 35","Friðheimar"),
+  O("hr"+s,"Hrunalaug hot spring","Near Flúðir","golden pool","hotsprings nature","$","Tiny stone-walled spring with a turf hut on a farm. Honesty-box fee; no showers.",10,"Rte 30","Flúðir"),
+  O("sm"+s,"Snowmobiling on Langjökull","From Gullfoss","golden glacier","nature sights","$$$$","Super-jeep up to the glacier, then an hour driving your own snowmobile. Suits, boots and helmets provided.",10,"Rte 35","Gullfoss","Runs only when wind and visibility allow; confirm the morning of."),
+  O("fo2"+s,"Fontana geothermal baths","Laugarvatn","golden lagoon","hotsprings","$$","Lakeside pools and steam rooms built over hot springs. You did the bread tour here in February.",30,"Rte 365","Þingvellir")
+];
+
+const SOUTH_DO = s => [
+  O("kq"+s,"Kvernufoss","Behind the Skógar Museum","vik falls","waterfalls hiking","Free","Hidden waterfall you can walk behind, 20 minutes from Skógafoss and usually empty.",5,"Rte 1","Skógafoss"),
+  O("pw"+s,"Sólheimasandur plane wreck","Rte 1, east of Skógar","vik hike","hiking sights","Shuttle fee","Flat 7 km round trip across black sand to the 1973 DC-3 wreck. Shuttle bus available.",10,"Rte 1","Skógafoss"),
+  O("vh"+s,"Horse riding on the black sand","Vík","vik horse","horses nature","$$","1–2 hour beach rides near Reynisfjara with Vík Horse Adventure.",0),
+  O("lc"+s,"LAVA Centre","Hvolsvöllur","hella indoor","sights culture","$$","Interactive volcano and earthquake exhibition. Best rainy-day stop on the south coast.",15,"Rte 1","Hella"),
+  O("ch"+s,"Caves of Hella","Ægissíða, Hella","hella cave","culture sights","$$","Man-made caves possibly older than the settlement of Iceland. Guided, about an hour.",5,"Rte 1","Hella"),
+  O("sk2"+s,"Skógar Museum","Skógar","vik indoor","culture","$$","Turf houses, a church and a big folk collection. Good when the rain arrives.")
+];
+const SOUTH_FOOD = s => [
+  O("gf"+s,"Gamla Fjósið (The Old Cowhouse)","Hvassafell, under Eyjafjöll","hella meal","dining","$$","Burgers and lamb stew in a converted cowshed between Seljalandsfoss and Skógafoss."),
+  O("sc"+s,"The Soup Company","Vík","vik meal","dining","$","Red Hot Lava soup in a bread bowl. Fast and warm."),
+  O("smb"+s,"Smiðjan Brugghús","Vík","vik dinner","dining nightlife","$$","Craft brewery with very good burgers and wings."),
+  O("hk"+s,"Halldórskaffi","Vík","vik dinner","dining","$$","Cosy timber house serving pizza, lamb and fish."),
+  O("mbc"+s,"Midgard Base Camp","Hvolsvöllur","hella dinner","dining nightlife","$$","Adventure lodge restaurant and bar with a rooftop hot tub. Good local food.")
+];
+
+const EXTRA = {
+ "2026-10-07":{
+   morning:[...RVK_CAFE("7"), O("es7","Mt Esja to Steinn","Esja trailhead, 15 min from Reykjavík","rvk hike","hiking nature","Free","Steady 2.5–3 hour round trip to the Steinn boulder with views over the city. Only if you slept on the plane.",20,"Rte 1","Reykjavík")],
+   midday:RVK_LUNCH("7").concat([RVK_DO("7")[5]]),
+   afternoon:RVK_DO("7").slice(0,5),
+   dinner:RVK_DINNER("7"),
+   evening:RVK_NIGHT("7").slice(0,5)
+ },
+ "2026-10-08":{
+   morning:[
+     O("vg8","Víðgelmir lava cave","Fljótstunga, Borgarfjörður","husafell cave","sights nature","$$","Walk into one of the largest lava tubes in the world on lit walkways. Ideal on today's storm.",105,"Rte 1 → 50 → 518","Reykjavík"),
+     O("gl8","Glymur waterfall hike","Hvalfjörður","hvamm hike","hiking waterfalls","Free","Iceland's second-highest waterfall, 3–4 hours with steep sections.",60,"Rte 1 → 47","Reykjavík","The river log bridge is usually removed by October, and today's rain makes it worse. Better on a dry day."),
+     O("sc8","Settlement Centre","Borgarnes","husafell indoor","culture","$$","Saga exhibitions in two old warehouses, with a good lunch restaurant.",60,"Rte 1","Reykjavík"),
+     ...GOLDEN_DO("8").slice(2,3)
+   ],
+   midday:[...GOLDEN_LUNCH("8"), O("scl8","Settlement Centre restaurant","Borgarnes","husafell meal","dining","$$","Lunch buffet of soup, fish and salads in a timber dining room.")],
+   afternoon:[...GOLDEN_DO("8").filter((_,i)=>i!==2), O("gg8","Geysir & Gullfoss","Haukadalur","golden falls","sights waterfalls","Free","If you want them for yourselves before Eva sees them on the 10th.",30,"Rte 35","Laugarás"),
+     O("gb8","Grábrók crater","Rte 1, north of Borgarnes","husafell hike","hiking sights","Free","15-minute climb up wooden stairs to a crater rim with lava-field views.",25,"Rte 1 → 50","Krauma")],
+   dinner:[
+     O("ld8","Lindin","Laugarvatn","golden fine","dining","$$$","Lakeside restaurant known for wild game: reindeer, goose and lamb."),
+     O("hg8","Hótel Geysir restaurant","Haukadalur","golden dinner","dining","$$$","Smart dining room steps from Strokkur."),
+     O("kr8","Krauma restaurant","Deildartunguhver","husafell dinner","dining","$$","Simple, good food beside the baths.")
+   ],
+   evening:[O("ib8","ION's Northern Lights Bar","ION Adventure Hotel","golden night","nightlife aurora","$$","Glass-walled bar facing the lava fields. Order a drink and watch the sky.")]
+ },
+ "2026-10-09":{
+   morning:[...RVK_CAFE("9"), RVK_DO("9")[5]],
+   midday:RVK_LUNCH("9"),
+   afternoon:RVK_DO("9").slice(0,5),
+   dinner:[...RVK_DINNER("9"), O("skl9","Skál!","Hlemmur Mathöll","rvk dinner","dining","$$","Michelin Bib Gourmand counter inside the food hall. Inventive and casual.")],
+   evening:[...RVK_NIGHT("9"), O("kk9","Kiki Queer Bar","Laugavegur 22","rvk night","nightlife","$$","Two floors and one of the best dance floors downtown on Fridays.")]
+ },
+ "2026-10-10":{
+   morning:[...GOLDEN_DO("10").slice(2,3), O("bf10","Brúarfoss blue-water hike","Off Rte 37","golden hike","hiking waterfalls","Parking fee","About 7 km round trip past three waterfalls. Today's dry weather is ideal.",55,"Rte 36 → 37","Reykjavík"),
+     O("ke10","Kerið crater","Rte 35, Grímsnes","golden view","sights hiking","$","Walk the red crater rim and down to the lake. 30 minutes.",60,"Rte 1 → 35","Reykjavík")],
+   midday:GOLDEN_LUNCH("10"),
+   afternoon:[...GOLDEN_DO("10").filter((_,i)=>i!==2), O("ke10b","Kerið crater","Rte 35, Grímsnes","golden view","sights hiking","$","Good last stop before driving south.",20,"Rte 35","Laugarás")],
+   dinner:[
+     O("ld10","Lindin","Laugarvatn","golden fine","dining","$$$","Wild game by the lake."),
+     O("hg10","Hótel Geysir restaurant","Haukadalur","golden dinner","dining","$$$","Smart dining room beside Strokkur."),
+     ...SOUTH_FOOD("10").slice(4,5)
+   ],
+   evening:[O("ur10","Aurora at Urriðafoss","Off Rte 1, 15 min west of Hella","hella aurora","aurora waterfalls","Free","Dark, close and away from town lights. Iceland's highest-volume waterfall at night.",15,"Rte 1","Hella")]
+ },
+ "2026-10-11":{
+   morning:[...SOUTH_DO("11").slice(0,3), O("nh11","Nauthúsagil ravine","Near Seljalandsfoss","hella hike","hiking waterfalls","Free","Short, wet scramble up a mossy ravine to a hidden waterfall.",25,"Rte 1 → 249","Hella")],
+   midday:[...SOUTH_FOOD("11").slice(0,4)],
+   afternoon:[...SOUTH_DO("11b")],
+   dinner:[...SOUTH_FOOD("11d").slice(2,5)],
+   evening:[O("sbn11","Smiðjan Brugghús taproom","Vík","vik night","nightlife","$$","Stay for a flight of local beers if the aurora is clouded out.")]
+ },
+ "2026-10-12":{
+   morning:[
+     O("hg12","Hellisheiði Geothermal Exhibition","Hellisheiði power plant","hvera indoor","sights culture","$$","See how Iceland heats its homes. Indoors, right on your way west.",15,"Rte 1","Hveragerði"),
+     O("hv12","Hveragerði geothermal park","Hveragerði","hvera walk","sights","$","Steaming vents in the middle of town, plus eggs boiled in a hot spring.",0),
+     O("ak12","Akranes lighthouse & Guðlaug pool","Akranes","hvamm lagoon","hotsprings sights","Free–$","Climb the old lighthouse, then soak in the free three-tier pool built into the sea wall.",35,"Rte 47 → 51","Hvammsvík")
+   ],
+   midday:[O("mjb12","Mjólkurbú Mathöll","Selfoss","hvera meal","dining","$$","Food hall in Selfoss's rebuilt old town, with lots of choice."), O("sg12","Skyrgerðin","Hveragerði","hvera meal","dining coffee","$$","Café in the old skyr factory. Skyr cake and good coffee."), ...RVK_LUNCH("12").slice(0,3)],
+   afternoon:[...RVK_DO("12").slice(0,5), O("ak12b","Akranes lighthouse & Guðlaug pool","Akranes","hvamm lagoon","hotsprings sights","Free–$","Pair it with Hvammsvík, 35 minutes away.",35,"Rte 47 → 51","Hvammsvík")],
+   dinner:[...RVK_DINNER("12"), O("gr12","Grillmarkaðurinn (Grill Market)","Lækjargata 2a","rvk dinner","dining","$$$","Lamb and fish over open flame. Book a 19:00 table.")],
+   evening:RVK_NIGHT("12")
+ },
+ "2026-10-13":{ morning: RVK_CAFE("13") }
+};
+// whale boats: same wardrobe and wind caution as other tours
+WX_SAFE_KINDS.boat = 1;
+Object.entries(EXTRA).forEach(([day,slots])=>{
+  const d = DAYS.find(x=>x.id===day); if(!d) return;
+  Object.entries(slots).forEach(([slot,arr])=>{
+    d.opts[slot] = d.opts[slot] || [];
+    arr.forEach(o=>{ if(d.opts[slot].some(x=>x.id===o.id)) return; LK[o.id]=o.lk; const {lk,...rest}=o; d.opts[slot].push(rest); });
+  });
+});
+
 const OPT = {}; DAYS.forEach(d=>Object.entries(d.opts).forEach(([s,arr])=>arr.forEach(o=>OPT[o.id]={...o,slot:s,day:d.id})));
 const MAX_DRIVE = 180;
 
