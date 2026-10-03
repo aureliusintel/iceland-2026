@@ -681,7 +681,11 @@ const SOUTH_FOOD = s => [
 
 const EXTRA = {
  "2026-10-07":{
-   morning:[...RVK_CAFE("7"), O("es7","Mt Esja to Steinn","Esja trailhead, 15 min from Reykjavík","rvk hike","hiking nature","Free","Steady 2.5–3 hour round trip to the Steinn boulder with views over the city. Only if you slept on the plane.",20,"Rte 1","Reykjavík")],
+   morning:[...RVK_CAFE("7"), ...RVK_DO("7m").filter((_,i)=>i!==5),
+     O("hk7m","Hallgrímskirkja tower","Skólavörðuholt","rvk city","sights culture","$","Lift to the top for the view over the colourful roofs. You two did it in January; still the best first look.",0),
+     O("pl7m","Perlan: ice cave and viewing deck","Öskjuhlíð","rvk indoor","sights culture","$$","Good while you wait for check-in.",10,"Local","Downtown"),
+     O("es7x","Grótta lighthouse walk","Seltjarnarnes","rvk walk","nature animals","Free","Flat shoreline walk to the lighthouse with seabirds and mountain views.",10,"Local","Downtown"),
+     O("es7","Mt Esja to Steinn","Esja trailhead, 15 min from Reykjavík","rvk hike","hiking nature","Free","Steady 2.5–3 hour round trip to the Steinn boulder with views over the city. Only if you slept on the plane.",20,"Rte 1","Reykjavík")],
    midday:RVK_LUNCH("7").concat([RVK_DO("7")[5]]),
    afternoon:RVK_DO("7").slice(0,5),
    dinner:RVK_DINNER("7"),
@@ -705,7 +709,9 @@ const EXTRA = {
    evening:[O("ib8","ION's Northern Lights Bar","ION Adventure Hotel","golden night","nightlife aurora","$$","Glass-walled bar facing the lava fields. Order a drink and watch the sky.")]
  },
  "2026-10-09":{
-   morning:[...RVK_CAFE("9"), RVK_DO("9")[5]],
+   morning:[...RVK_CAFE("9"), ...RVK_DO("9m"),
+     O("bb9m","Bridge Between Continents & Brimketill","Reykjanes, near KEF","kef view","sights nature","Free","Walk the footbridge across the plate gap, then the wave-filled lava pool at Brimketill. 20 minutes from arrivals.",20,"Rte 41 → 425","KEF"),
+     O("hk9m","Hallgrímskirkja tower & Rainbow Street","Skólavörðuholt","rvk city","sights culture","$","Eva's first look over the city.",45,"Rte 41","KEF")],
    midday:RVK_LUNCH("9"),
    afternoon:RVK_DO("9").slice(0,5),
    dinner:[...RVK_DINNER("9"), O("skl9","Skál!","Hlemmur Mathöll","rvk dinner","dining","$$","Michelin Bib Gourmand counter inside the food hall. Inventive and casual.")],
@@ -741,9 +747,17 @@ const EXTRA = {
    dinner:[...RVK_DINNER("12"), O("gr12","Grillmarkaðurinn (Grill Market)","Lækjargata 2a","rvk dinner","dining","$$$","Lamb and fish over open flame. Book a 19:00 table.")],
    evening:RVK_NIGHT("12")
  },
- "2026-10-13":{ morning: RVK_CAFE("13") }
+ "2026-10-13":{ morning: [...RVK_CAFE("13"),
+     O("hp13","Harpa and the Sun Voyager","Harbour front","rvk walk","sights","Free","Early walk along the shore before you head to the airport. 30–45 minutes.",0),
+     O("bb13","Bridge Between Continents & Brimketill","Reykjanes, 20 min from KEF","kef view","sights nature","Free","A last stop on the way to the airport if you leave Reykjavík by 8:00.",50,"Rte 41 → 43 → 425","Reykjavík"),
+     O("gv13","Gunnuhver steam vents","Reykjanes tip","kef view","sights","Free","Roaring mud pool and the Reykjanes lighthouse, 25 minutes from KEF.",55,"Rte 41 → 425","Reykjavík")] }
 };
 // whale boats: same wardrobe and wind caution as other tours
+// a simple breakfast choice on road-trip days, so mornings can pair food + an activity
+["2026-10-08","2026-10-10","2026-10-11","2026-10-12"].forEach(day=>{
+  const n=day.slice(-2);
+  (EXTRA[day].morning ||= []).unshift(O("bk"+n,"Breakfast at your hotel or lodge","Wherever you slept","rvk meal","dining coffee","Often included","Quick start so the morning goes to the main activity. Most hotels serve 7:00–10:00."));
+});
 WX_SAFE_KINDS.boat = 1;
 Object.entries(EXTRA).forEach(([day,slots])=>{
   const d = DAYS.find(x=>x.id===day); if(!d) return;
@@ -856,7 +870,7 @@ function renderDay(){
       + `<section class="slot"><button class="btn primary" data-build="${d.id}" data-done="1">Done building</button></section>`
       : renderMyDay(d, mt)}`;
 }
-const SLOT_KIND = {morning:"Activity", midday:"Lunch or activity", afternoon:"Activity", dinner:"Dinner", evening:"Night out", stay:"Where to sleep"};
+const SLOT_KIND = {morning:"Breakfast & activities", midday:"Lunch or activity", afternoon:"Activity", dinner:"Dinner", evening:"Night out", stay:"Where to sleep"};
 function renderMyDay(d, mt){
   if(!mt || !present(mt,d.id)) return `<section class="slot"><p class="empty" style="margin:0">${mt?esc(mt.name)+" isn't here this day.":"Choose who you are at the top to see your day."}</p></section>`;
   const rows = SLOTS.filter(s=>d.opts[s.id]).map(s=>{ const os = picksOf(d.id,s.id,mt.id).map(id=>OPT[id]).filter(Boolean);
