@@ -1,0 +1,4 @@
+{
+  "crons": [{ "path": "/api/cron-weather", "schedule": "40 10 * * *" }],
+  "functions": { "api/*.js": { "maxDuration": 30 } }
+}

@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0F171B">
+<title>Iceland Fall 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a field guide. Sticky day strip on top, one day at a time below; road-sign chips carry drive times. */
+:root{
+  --bg:#EDF1F0; --surface:#FFFFFF; --sunk:#E3E9E8; --ink:#18232A; --muted:#566A70; --line:#D0DAD9;
+  --sign:#1D5C8C; --sign-ink:#FFFFFF; --moss:#4F6E2E; --warn:#B4482A; --warn-bg:#F8E4DC; --ok-bg:#E3EED8;
+  --bob:#2F6FB0; --amanda:#7B4C9E; --eva:#C9552F; --t4:#2E8A7A; --t5:#8A6D1E;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F171B; --surface:#172228; --sunk:#121C21; --ink:#E4ECED; --muted:#93A5AA; --line:#2A3B42;
+  --sign:#2C6EA3; --sign-ink:#FFFFFF; --moss:#9CBB6A; --warn:#EE9068; --warn-bg:#3A231B; --ok-bg:#1F2E18;
+  --bob:#73A7E0; --amanda:#B992D8; --eva:#F08A63; --t4:#5CC4B0; --t5:#D1B25A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F171B; --surface:#172228; --sunk:#121C21; --ink:#E4ECED; --muted:#93A5AA; --line:#2A3B42;
+  --sign:#2C6EA3; --sign-ink:#FFFFFF; --moss:#9CBB6A; --warn:#EE9068; --warn-bg:#3A231B; --ok-bg:#1F2E18;
+  --bob:#73A7E0; --amanda:#B992D8; --eva:#F08A63; --t4:#5CC4B0; --t5:#D1B25A; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{-webkit-text-size-adjust:100%}
+img{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+a{color:var(--sign)} :root[data-theme="dark"] a{color:#8EC0EC}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a{color:#8EC0EC}}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sign);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{max-width:1040px;margin:0 auto;padding:10px 16px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02em;line-height:1;margin:0;text-transform:uppercase}
+h1 small{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--muted);text-transform:none;display:block;margin-top:4px}
+.me{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);white-space:nowrap}
+.me select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+nav.tabs{max-width:1040px;margin:0 auto;padding:8px 16px 0;display:flex;gap:4px;overflow-x:auto}
+nav.tabs button{border:0;background:none;padding:8px 12px;border-radius:8px 8px 0 0;cursor:pointer;color:var(--muted);font-weight:700;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);box-shadow:inset 0 -3px 0 var(--sign)}
+.days{max-width:1040px;margin:0 auto;padding:8px 16px 10px;display:flex;gap:6px;overflow-x:auto}
+.days button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;cursor:pointer;text-align:left;min-width:76px}
+.days button b{font-family:var(--display);font-size:18px;font-weight:800;display:block;line-height:1.05;text-transform:uppercase}
+.days button span{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.days button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.days button[aria-current="true"] span{color:var(--bg);opacity:.8}
+.dots{display:inline-flex;gap:3px;margin-top:3px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+section{margin-top:22px}
+h2{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;margin:0;text-transform:uppercase;text-wrap:balance;letter-spacing:.01em}
+h3{font-family:var(--display);font-weight:800;font-size:20px;margin:0;text-transform:uppercase;letter-spacing:.03em}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dayhead{display:grid;gap:10px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:700}
+.who{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px 3px 4px;font-size:13px;border:1px solid var(--line);background:var(--surface)}
+.av{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-weight:700;font-size:12px;flex:0 0 auto}
+.anchor{display:flex;gap:10px;align-items:baseline;padding:10px 12px;border-radius:var(--r);background:var(--sunk);border:1px dashed var(--line);font-size:14px}
+.anchor time{font-family:var(--mono);font-size:13px;font-weight:500}
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.path{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:6px;align-content:start}
+.path .k{font-family:var(--display);font-weight:800;font-size:15px;color:var(--sign);letter-spacing:.06em}
+.path p{margin:0;font-size:13.5px;color:var(--muted)}
+.path .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700}
+.btn.primary{background:var(--sign);border-color:var(--sign);color:var(--sign-ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.slot{margin-top:20px}
+.slothead{display:flex;align-items:baseline;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:4px;margin-bottom:10px}
+.slothead .eyebrow{margin-left:auto}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:7px;align-content:start;min-width:0}
+.opt.mine{border-color:var(--sign);box-shadow:0 0 0 1px var(--sign)}
+.opt h4{margin:0;font-size:16px;line-height:1.25}
+.opt p{margin:0;font-size:13.5px;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sign{font-family:var(--mono);font-size:11.5px;background:var(--sign);color:var(--sign-ink);border-radius:4px;padding:2px 6px;border:1.5px solid var(--sign-ink);outline:1.5px solid var(--sign);white-space:nowrap}
+.sign.over{background:var(--warn);outline-color:var(--warn)}
+.tag{font-size:11.5px;border-radius:4px;padding:2px 6px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.done{background:var(--ok-bg);color:var(--moss);font-weight:700}
+.tag.saved{background:var(--sunk);color:var(--ink)}
+.tag.warn{background:var(--warn-bg);color:var(--warn);font-weight:700;white-space:normal}
+.tag.done{white-space:normal}
+.price{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.pickrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px;margin-top:2px}
+.pickrow .lbl{font-size:12px;color:var(--muted);margin-right:2px}
+.pk{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:2px 9px 2px 3px;cursor:pointer;font-size:12.5px;font-weight:700}
+.pk .av{width:20px;height:20px;font-size:11px;opacity:.35}
+.pk[aria-pressed="true"]{border-color:currentColor}
+.pk[aria-pressed="true"] .av{opacity:1}
+.fits{font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:center}
+.links{display:flex;gap:12px;font-size:12.5px;flex-wrap:wrap}
+.status{font-size:12.5px;color:var(--muted);padding:8px 12px;border-radius:8px;background:var(--sunk);margin-top:12px}
+.status.err{background:var(--warn-bg);color:var(--warn)}
+/* schedule */
+.sched{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.sched table{border-collapse:collapse;width:100%;min-width:560px;font-size:13.5px}
+.sched th,.sched td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+.sched th{font-weight:700;background:var(--sunk)}
+.sched td.slotc{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.04em;width:110px}
+.sched td.slotc span{display:block;font-family:var(--mono);font-weight:500;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0}
+.cell{display:grid;gap:2px}
+.cell b{font-weight:700}
+.cell small{color:var(--muted)}
+.empty{color:var(--muted);font-style:italic}
+.split{color:var(--warn);font-weight:700;font-size:11.5px}
+.same{color:var(--moss);font-weight:700;font-size:11.5px}
+.wx{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.wxc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:grid;gap:2px;min-width:0}
+.wxc .t{font-family:var(--display);font-weight:800;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.wxc .t small{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--muted)}
+.wxc .n{font-size:12.5px;color:var(--muted)}
+.wxc .l{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.wxc.aur{grid-column:1/-1}
+.wxc.wet{border-color:var(--sign)} .wxc.storm{border-color:var(--warn);background:var(--warn-bg)}
+.wxpill{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+details.wear{font-size:13px}
+details.wear summary{cursor:pointer;font-weight:700;color:var(--ink);list-style-position:outside}
+details.wear ul{margin:6px 0 0;padding-left:18px;color:var(--muted)}
+details.wear li{margin:2px 0}
+.pack{display:flex;flex-wrap:wrap;gap:6px}
+.pack span{font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.cell .w{font-size:11.5px;color:var(--muted)}
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.gatecard{display:grid;gap:12px;width:100%;max-width:360px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0}
+.trav{display:grid;gap:10px}
+.trav .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label{font-size:12px;color:var(--muted);display:grid;gap:3px}
+input,select{font:inherit;font-size:14px;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;min-width:0}
+.ints{display:flex;flex-wrap:wrap;gap:6px}
+.ints button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:3px 10px;font-size:12.5px;cursor:pointer}
+.ints button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.lede{max-width:66ch;color:var(--muted);margin:8px 0 0}
+.rules li{margin:4px 0}
+.overview td.day{font-family:var(--display);font-weight:800;text-transform:uppercase;white-space:nowrap}
+@media (max-width:520px){h2{font-size:28px}.trav .row{grid-template-columns:1fr}.me{margin-left:0;width:100%}}
+@media (prefers-reduced-motion:no-preference){.opt{transition:border-color .15s, box-shadow .15s}}
+</style>
+</head>
+<body>
+
+
+<div id="gate" class="gate" hidden>
+  <form id="gateForm" class="card gatecard">
+    <h1>Iceland Fall 2026</h1>
+    <p class="lede" style="margin:0">Enter the trip passcode Bob sent you.</p>
+    <label for="code">Passcode<input id="code" type="password" autocomplete="current-password" required></label>
+    <button class="btn primary" type="submit">Open the trip</button>
+    <p id="gateMsg" class="eyebrow" role="alert"></p>
+  </form>
+</div>
+<div id="app" hidden>
+<header class="top">
+  <div class="bar">
+    <h1>Iceland Fall 2026<small id="tripline">Oct 7–13 · KEF in, KEF out</small></h1>
+    <div class="me"><label for="meSel" style="display:inline">Picking as</label>
+      <select id="meSel"></select></div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-day" aria-selected="true">Choose the day</button>
+    <button role="tab" id="tab-sched" aria-selected="false">Schedule</button>
+    <button role="tab" id="tab-trip" aria-selected="false">Trip &amp; travelers</button>
+  </nav>
+  <div class="days" id="dayStrip"></div>
+</header>
+
+<main class="wrap">
+  <div id="dbStatus" class="status">Loading the trip…</div>
+  <div id="view"></div>
+</main>
+</div>
+
+<script>
+/* ---------- Static guide content (places, options, paths) ---------- */
+const INTERESTS = {
+  hotsprings:"Hot springs", horses:"Horseback", hiking:"Hikes", waterfalls:"Waterfalls", animals:"Animals",
+  nature:"Nature", sights:"Sights", nightlife:"Nightlife", dining:"Great dinners", coffee:"Lattes & cafés",
+  shopping:"Shopping", aurora:"Northern Lights", stays:"Interesting stays", culture:"Culture"
+};
+const SLOTS = [
+  {id:"morning", name:"Morning", time:"8:00–11:30"},
+  {id:"midday", name:"Midday", time:"11:30–14:00"},
+  {id:"afternoon", name:"Afternoon", time:"14:00–18:00"},
+  {id:"dinner", name:"Dinner", time:"19:00"},
+  {id:"evening", name:"Night", time:"21:00+"},
+  {id:"stay", name:"Sleep", time:"overnight"}
+];
+const ig = (h,p)=>({handle:h,url: /\/$/.test(p) ? "https://www.instagram.com/"+h+"/" : "https://www.instagram.com/"+h+"/"+p+"/"});
+const DONE = "Done Feb ’26";
+const DAYS = [
+ {id:"2026-10-07", dow:"Wed", label:"Oct 7", title:"Land and loosen up", region:"Reykjanes · Reykjavík",
+  sun:"08:00 / 18:28", note:"Red-eye landing. Keep it light, get outside, then a long dinner.",
+  anchors:[{t:"06:30",x:"Land at KEF, pick up the rental car"}],
+  paths:[
+   {k:"A",name:"Ease in",d:"Café breakfast, a cliff-edge lagoon, wool shopping, classic Icelandic dinner, live music at the bookstore bar.",
+    set:{morning:"m7a",midday:"d7b",afternoon:"a7b",dinner:"n7b",evening:"e7a",stay:"s7b"}},
+   {k:"B",name:"Go underground",d:"Walk a lava tube on the way in, nap, then a 17-seat tasting menu and an aurora check at Grótta.",
+    set:{morning:"m7b",midday:"d7a",afternoon:"a7c",dinner:"n7a",evening:"e7b",stay:"s7a"}},
+   {k:"C",name:"Straight back to Hvammsvík",d:"Skip the city. Ocean-edge hot springs where you saw the big aurora in February, and sleep there.",
+    set:{morning:"m7a",midday:"d7c",afternoon:"a7d",dinner:"n7d",evening:"e7c",stay:"s7d"}}
+  ],
+  opts:{
+   morning:[
+    {id:"m7a",t:"Breakfast at Sandholt",where:"Laugavegur 36, Reykjavík",drive:45,road:"Rte 41",from:"KEF",tags:["coffee","dining"],p:"$$",d:"Fourth-generation bakery. Sourdough, pastries and proper lattes while you wait for check-in.",saved:ig("wakeupreykjavik","reel/DcbRC78oSYi")},
+    {id:"m7b",t:"BakaBaka",where:"Bankastræti 2, Reykjavík",drive:45,road:"Rte 41",from:"KEF",tags:["coffee"],p:"$",d:"Small bakery-café from the same saved post. Good stop before a walk up to Hallgrímskirkja.",saved:ig("wakeupreykjavik","reel/DcbRC78oSYi")},
+    {id:"m7c",t:"Bónus grocery run",where:"Any Bónus (pink pig sign)",drive:40,road:"Rte 41",from:"KEF",tags:["shopping"],p:"$",d:"Skyr, snacks, Icelandic candy and water for the car. Cheapest food in the country.",saved:ig("thatweirdplantguy","reel/DcRwrlVIZEV")}
+   ],
+   midday:[
+    {id:"d7a",t:"Raufarhólshellir lava tunnel",where:"Rte 39, between Reykjavík and Þorlákshöfn",drive:35,road:"Rte 1 → 39",from:"Reykjavík",tags:["sights","nature"],p:"$$",d:"Guided walk through a 1,360 m lava tube. About an hour, year-round, cold inside.",saved:ig("speakviking","reel/")},
+    {id:"d7b",t:"Sky Lagoon",where:"Kársnes, Kópavogur",drive:15,road:"Local",from:"Reykjavík",tags:["hotsprings"],p:"$$$",d:"Infinity-edge lagoon over the ocean with a seven-step sauna ritual. Close to downtown, not the Blue Lagoon."},
+    {id:"d7c",t:"Check in and nap",where:"Your hotel",drive:0,tags:[],p:"",d:"Honest option after an overnight flight. Most hotels can store bags or hold an early room if you ask ahead."}
+   ],
+   afternoon:[
+    {id:"a7a",t:"Perlan: ice cave and viewing deck",where:"Öskjuhlíð, Reykjavík",drive:10,road:"Local",from:"Downtown",tags:["sights","culture"],p:"$$",d:"Indoor man-made ice cave, glacier and volcano exhibits, 360° deck over the city."},
+    {id:"a7b",t:"Wool and design shopping",where:"Skólavörðustígur & Laugavegur",drive:0,tags:["shopping"],p:"$$–$$$",d:"Handknitting Association of Iceland for a real lopapeysa, 66°North, and the design shops along Laugavegur.",saved:ig("audreyroseburrows","reel/DcJEDOhKsxw")},
+    {id:"a7c",t:"Swans at Tjörnin and the Old Harbour",where:"City pond to Grandi",drive:0,tags:["animals","nature"],p:"Free",d:"You fed the whooper swans here in February. Then walk out to the harbour and Grandi's food hall.",done:DONE},
+    {id:"a7d",t:"Soak at Hvammsvík Hot Springs",where:"Hvalfjörður",drive:45,road:"Rte 1 → 47",from:"Reykjavík",tags:["hotsprings","nature"],p:"$$ (from ~$90)",d:"Eight ocean-edge pools from 10 °C sea to 42 °C. Open 10:30–20:30, last entry 19:00. Book ahead.",done:DONE}
+   ],
+   dinner:[
+    {id:"n7a",t:"ÓX",where:"Laugavegur 55, behind Sumac",drive:0,tags:["dining"],p:"$$$$",d:"17-seat counter, chef Þráinn Freyr's tasting menu. Books out weeks ahead."},
+    {id:"n7b",t:"Hressó",where:"Austurstræti 20",drive:0,tags:["dining","culture"],p:"$$",d:"Local favourite since 1932. Get the Icelandic tasting platter.",saved:ig("guidetoiceland","reel/")},
+    {id:"n7c",t:"Sumac",where:"Laugavegur 28",drive:0,tags:["dining"],p:"$$$",d:"Icelandic produce with North African and Lebanese spice. Lively room, good cocktails."},
+    {id:"n7d",t:"Stormur Bistro at Hvammsvík",where:"Hvammsvík",drive:0,tags:["dining"],p:"$$",d:"Light Nordic menu on site. The seafood soup is the order."}
+   ],
+   evening:[
+    {id:"e7a",t:"Bookstore bar: Hús máls og menningar",where:"Laugavegur 18",drive:0,tags:["nightlife","culture"],p:"$$",d:"Bookshop, café and bar in one, with live music every night. On your list and in two saved posts.",saved:ig("oliviaostrowski_","reel/DcSF2VDR7SQ")},
+    {id:"e7b",t:"Aurora check at Grótta lighthouse",where:"Seltjarnarnes",drive:10,road:"Local",from:"Downtown",tags:["aurora"],p:"Free",d:"The darkest easy spot near downtown. Check the aurora forecast (vedur.is) and cloud cover first.",saved:ig("the.travel.unicorns","reel/DRojxz_jlNb")},
+    {id:"e7c",t:"Hot pools under the night sky",where:"Hvammsvík",drive:0,tags:["aurora","hotsprings"],p:"",d:"Where you shot the green arcs on Feb 8. Last pool entry is 19:00, so watch from the shore after.",done:DONE}
+   ],
+   stay:[
+    {id:"s7a",t:"The Reykjavík EDITION",where:"Austurbakki, by Harpa",drive:0,tags:["stays"],p:"$$$$",d:"Harbour-front luxury, rooftop bar, spa. Walk to everything."},
+    {id:"s7b",t:"Hotel Borg",where:"Austurvöllur square",drive:0,tags:["stays","culture"],p:"$$$",d:"1930 Art Deco landmark on the main square. Classic, central."},
+    {id:"s7c",t:"Downtown Airbnb with a view",where:"101 Reykjavík",drive:0,tags:["stays"],p:"$$–$$$$",d:"Plenty of loft apartments near Hallgrímskirkja.",link:"https://www.airbnb.com/s/Reykjavik--Iceland/homes?checkin=2026-10-07&checkout=2026-10-08&adults=2"},
+    {id:"s7d",t:"Hvammsvík Artist Lodge or historic house",where:"Hvalfjörður",drive:45,road:"Rte 1 → 47",from:"Reykjavík",tags:["stays","hotsprings","aurora"],p:"$$$–$$$$",d:"12 houses on a 1,200-acre estate with the hot springs out front.",link:"https://www.hvammsvik.com/"}
+   ]
+  }},
+ {id:"2026-10-08", dow:"Thu", label:"Oct 8", title:"A day that's new to you both", region:"Golden Circle or Borgarfjörður",
+  sun:"08:03 / 18:24", note:"Last couple day. Stay where you can reach KEF by 9:30 tomorrow.",
+  anchors:[],
+  paths:[
+   {k:"A",name:"Blue water, new lagoon",d:"Hike to Brúarfoss, farm lunch, then the new Laugarás Lagoon and dinner at its restaurant.",
+    set:{morning:"m8b",midday:"d8b",afternoon:"a8a",dinner:"n8a",evening:"e8a",stay:"s8a"}},
+   {k:"B",name:"Lava falls & Europe's strongest spring",d:"West to Borgarfjörður: Hraunfossar, Krauma baths, into Langjökull glacier, sleep at Húsafell.",
+    set:{morning:"m8c",midday:"d8c",afternoon:"a8d",dinner:"n8c",evening:"e8b",stay:"s8b"}},
+   {k:"C",name:"Ride first",d:"Morning on horseback in Mosfellsdalur, tomato lunch at Friðheimar, Kerið crater, Viking feast.",
+    set:{morning:"m8a",midday:"d8a",afternoon:"a8b",dinner:"n8b",evening:"e8a",stay:"s8a"}},
+   {k:"D",name:"Storm-day plan",d:"Built for the forecast: underground in the lava tunnel, lunch in a warm greenhouse, then a long soak and dinner at Laugarás.",
+    set:{morning:"m8e",midday:"d8a",afternoon:"a8a",dinner:"n8a",evening:"e8a",stay:"s8a"}}
+  ],
+  opts:{
+   morning:[
+    {id:"m8a",t:"Horseback at Laxnes Farm",where:"Mosfellsdalur",drive:25,road:"Rte 36",from:"Reykjavík",tags:["horses","nature"],p:"$$",d:"Family horse farm 25 minutes out. Easy valley rides for mixed experience, about two hours."},
+    {id:"m8b",t:"Brúarfoss blue-water hike",where:"Off Rte 37, near Laugarvatn",drive:80,road:"Rte 36 → 37",from:"Reykjavík",tags:["hiking","waterfalls"],p:"Free (parking fee)",d:"About 7 km round trip past three waterfalls to the bright blue Brúarfoss. Moderate and muddy in October."},
+    {id:"m8c",t:"Hraunfossar & Barnafoss",where:"Borgarfjörður, Rte 518",drive:100,road:"Rte 1 → 50 → 518",from:"Reykjavík",tags:["waterfalls","nature"],p:"Free",d:"Water seeps out of a lava field in hundreds of falls. Short paved paths."},
+    {id:"m8e",t:"Raufarhólshellir lava tunnel",where:"Rte 39, between Reykjavík and Þorlákshöfn",drive:35,road:"Rte 1 → 39",from:"Reykjavík",tags:["sights","nature"],p:"$$",d:"Guided walk through a 1,360 m lava tube. Rain doesn't matter underground.",saved:ig("speakviking","reel/")},
+    {id:"m8d",t:"Kerlingarfjöll highland hike",where:"Hveradalir, via F35",drive:240,road:"Rte 35 → F35 → F347",from:"Reykjavík",tags:["hiking","nature"],p:"Free",warn:"F35 is a summer road and is often closed by October. Needs a 4x4 your rental allows on F-roads. Check road.is the night before.",d:"Steaming rainbow valley in the highlands, ~5 km shorter loop.",saved:ig("sandra.rybarik","reel/DeAH-Z1NXPo")}
+   ],
+   midday:[
+    {id:"d8a",t:"Friðheimar tomato greenhouse",where:"Reykholt, Golden Circle",drive:30,road:"Rte 35",from:"Laugarvatn",tags:["dining","culture"],p:"$$",d:"Lunch among the vines: tomato soup, fresh bread, the cucumber margarita. Book a table."},
+    {id:"d8b",t:"Efstidalur farm lunch",where:"Near Laugarvatn",drive:15,road:"Rte 37",from:"Brúarfoss",tags:["dining","animals"],p:"$$",d:"Burgers and farm ice cream, with the cow barn behind glass."},
+    {id:"d8c",t:"Deildartunguhver & lunch at Krauma",where:"Reykholtsdalur, Borgarfjörður",drive:20,road:"Rte 518",from:"Hraunfossar",tags:["dining","hotsprings","sights"],p:"$$",d:"Europe's highest-flow hot spring next to the Krauma restaurant."}
+   ],
+   afternoon:[
+    {id:"a8a",t:"Laugarás Lagoon",where:"Laugarás, off Rte 30",drive:30,road:"Rte 37 → 35",from:"Efstidalur",tags:["hotsprings","nature"],p:"$$$",d:"Opened 2025 above the Hvítá river: infinity edge, 6.6 m waterfall, forest pool, swim-up bar. 10:00–21:00, last entry 19:30.",saved:ig("adventureussouls","reel/Dcg-KBJuDht")},
+    {id:"a8b",t:"Kerið crater rim walk",where:"Rte 35, Grímsnes",drive:20,road:"Rte 35",from:"Friðheimar",tags:["sights","hiking","nature"],p:"$",d:"Red-walled volcanic crater with a lake in it. 30-minute loop on the rim and down to the water."},
+    {id:"a8c",t:"Krauma baths",where:"Deildartunguhver",drive:0,tags:["hotsprings"],p:"$$",d:"Five warm pools and a cold plunge fed by the spring next door. Quieter than the big lagoons."},
+    {id:"a8d",t:"Into the Glacier ice tunnel",where:"Langjökull, from Húsafell",drive:30,road:"Rte 518",from:"Krauma",tags:["sights","nature"],p:"$$$$",warn:"Tours run on a schedule. Check the October departure times before you commit.",d:"Super-truck ride onto Iceland's second-largest glacier, then a walk through man-made ice tunnels."}
+   ],
+   dinner:[
+    {id:"n8a",t:"Ylja at Laugarás Lagoon",where:"Laugarás",drive:0,tags:["dining"],p:"$$$",d:"Chef Gísli Matt's local, seasonal menu. Kitchen closes 21:15."},
+    {id:"n8b",t:"Ingólfsskáli Viking feast",where:"Efstaland, Ölfus, below Ingólfsfjall",drive:35,road:"Rte 35 → 1",from:"Kerið",tags:["dining","culture"],p:"$$$",d:"Turf-roofed hall, mead from a horn, forge-made cutlery. Call ahead for hours (+354 662 3400).",saved:ig("cassiescompass","reel/DbjiYQJMmMu")},
+    {id:"n8c",t:"Dinner at Hotel Húsafell",where:"Húsafell",drive:0,tags:["dining"],p:"$$$",d:"Good hotel restaurant in a birch-forest valley, an easy end to the west loop."}
+   ],
+   evening:[
+    {id:"e8a",t:"Aurora watch from your lodging",where:"Wherever you sleep",drive:0,tags:["aurora"],p:"",d:"Out of city light is the whole trick. Set an alert on the vedur.is aurora map."},
+    {id:"e8b",t:"Húsafell pools under the stars",where:"Húsafell",drive:0,tags:["hotsprings","aurora"],p:"$",d:"Village pool and hotel hot tubs in one of the darkest valleys near the glacier."}
+   ],
+   stay:[
+    {id:"s8a",t:"ION Adventure Hotel",where:"Nesjavellir, by Þingvellir",drive:0,tags:["stays","aurora"],p:"$$$",d:"Glass-walled hotel on stilts with the Northern Lights Bar. 1 h 15 to KEF for tomorrow's pickup."},
+    {id:"s8b",t:"Hotel Húsafell",where:"Húsafell, Borgarfjörður",drive:0,tags:["stays"],p:"$$$",d:"Design hotel by the glacier. 2 h 15 to KEF, so leave by 7:00 tomorrow."},
+    {id:"s8c",t:"Buubble (5 Million Star Hotel)",where:"Golden Circle forest",drive:0,tags:["stays","aurora"],p:"$$",d:"Clear bubble rooms for sleeping under the sky. Shared bathrooms. Fun, not luxury."},
+    {id:"s8d",t:"Highland Base Kerlingarfjöll",where:"Kerlingarfjöll",drive:0,tags:["stays","hotsprings"],p:"$$$",warn:"Only if F35 is open; about 4 h to KEF tomorrow.",d:"Mountain hotel with geothermal baths in the highlands."}
+   ]
+  }},
+ {id:"2026-10-09", dow:"Fri", label:"Oct 9", title:"Eva lands", region:"Reykjanes · Reykjavík",
+  sun:"08:06 / 18:19", note:"First full-group day. From here on, no single drive over 3 hours. Friday night is the big night out.",
+  anchors:[{t:"09:30",x:"Eva lands at KEF. Pick up at arrivals."}],
+  paths:[
+   {k:"A",name:"Soft landing",d:"Straight to Sky Lagoon, Hallgrímskirkja and Rainbow Street for Eva, shopping, seafood dinner, bookstore bar.",
+    set:{morning:"m9a",midday:"d9b",afternoon:"a9c",dinner:"n9a",evening:"e9b",stay:"s9a"}},
+   {k:"B",name:"Hit the ground riding",d:"Steam vents near the airport, famous hot dogs, a lava-field ride, Grill Market, then dancing.",
+    set:{morning:"m9b",midday:"d9a",afternoon:"a9a",dinner:"n9b",evening:"e9c",stay:"s9c"}},
+   {k:"C",name:"Reykjavík classic",d:"Brunch, the church tower, Perlan's ice cave, Michelin dinner at Brút, the ice bar.",
+    set:{morning:"m9c",midday:"d9b",afternoon:"a9b",dinner:"n9c",evening:"e9a",stay:"s9b"}}
+  ],
+  opts:{
+   morning:[
+    {id:"m9a",t:"Sky Lagoon recovery soak",where:"Kópavogur",drive:40,road:"Rte 41",from:"KEF",tags:["hotsprings"],p:"$$$",d:"Best cure for Eva's overnight flight. Book the ritual pass."},
+    {id:"m9b",t:"Gunnuhver steam vents & Reykjanes lighthouse",where:"Reykjanes tip",drive:20,road:"Rte 425",from:"KEF",tags:["sights","nature"],p:"Free",d:"Boardwalk over a roaring mud pool, 20 minutes from the airport. Seriously steamy."},
+    {id:"m9c",t:"Brunch at Brauð & Co, then rest",where:"Frakkastígur 16",drive:45,road:"Rte 41",from:"KEF",tags:["coffee"],p:"$",d:"Cinnamon buns in the graffiti-covered bakery. Check in and let Eva sleep an hour."}
+   ],
+   midday:[
+    {id:"d9a",t:"Bæjarins Beztu Pylsur",where:"Tryggvagata 1",drive:0,tags:["dining"],p:"$",d:"Iceland's famous hot dog stand since 1937. Order one with everything.",saved:ig("iceland.explore","p/DTtFKC5ARC9")},
+    {id:"d9b",t:"Hallgrímskirkja tower & Rainbow Street",where:"Skólavörðuholt",drive:0,tags:["sights","culture"],p:"$",d:"Eva's first look over the city. You two did this on Jan 31.",done:DONE},
+    {id:"d9c",t:"Hlemmur Mathöll food hall",where:"Laugavegur 107",drive:0,tags:["dining"],p:"$$",d:"Old bus station turned food hall. Everyone gets what they want."}
+   ],
+   afternoon:[
+    {id:"a9a",t:"Lava-field horseback ride (Íshestar)",where:"Hafnarfjörður",drive:20,road:"Rte 41",from:"Reykjavík",tags:["horses","nature"],p:"$$",d:"Same moss-and-lava ride you two did Feb 1. About 1.5–2 hours, beginner-friendly.",done:DONE},
+    {id:"a9b",t:"Perlan: ice cave and viewing deck",where:"Öskjuhlíð",drive:10,road:"Local",from:"Downtown",tags:["sights","culture"],p:"$$",d:"Walk through an ice cave and see the city from the dome."},
+    {id:"a9c",t:"Laugavegur shopping",where:"Laugavegur & Skólavörðustígur",drive:0,tags:["shopping","coffee"],p:"$$",d:"Wool, 66°North, vintage and record shops, with café stops in between.",saved:ig("audreyroseburrows","reel/DcJEDOhKsxw")}
+   ],
+   dinner:[
+    {id:"n9a",t:"The Fish Market",where:"Aðalstræti 12",drive:0,tags:["dining"],p:"$$$",d:"Chef Hrefna Sætran's seafood tasting menu. A safe high-end pick everyone will like."},
+    {id:"n9b",t:"Grillmarkaðurinn (Grill Market)",where:"Lækjargata 2a",drive:0,tags:["dining"],p:"$$$",d:"Lamb and fish over open flame in a moody, wood-and-moss room. Book Friday early."},
+    {id:"n9c",t:"Brút",where:"Pósthússtræti 2",drive:0,tags:["dining"],p:"$$$$",d:"Michelin-starred Nordic seafood from chef Ragnar Eiríksson."}
+   ],
+   evening:[
+    {id:"e9a",t:"Ice bar (Magic Ice)",where:"Laugavegur",drive:0,tags:["nightlife"],p:"$$",d:"Drinks in ice glasses among ice sculptures. You two went Jan 31; it's Eva's first.",done:DONE},
+    {id:"e9b",t:"Bookstore bar: Hús máls og menningar",where:"Laugavegur 18",drive:0,tags:["nightlife","culture"],p:"$$",d:"Live band most nights. The saved reel: 'we went both nights and danced.'",saved:ig("cassandrabotnick","reel/DTqFr40D2HE")},
+    {id:"e9c",t:"Friday bar crawl",where:"Kaffibarinn → Kiki → Pablo Discobar",drive:0,tags:["nightlife"],p:"$$",d:"Reykjavík goes out late; things fill up after 23:00. Alcohol is pricey, so happy hours matter."}
+   ],
+   stay:[
+    {id:"s9a",t:"The Reykjavík EDITION",where:"By Harpa",drive:0,tags:["stays"],p:"$$$$",d:"Two rooms or a suite. Closest luxury to the nightlife."},
+    {id:"s9b",t:"Reykjavík Konsúlat Hotel",where:"Hafnarstræti",drive:0,tags:["stays"],p:"$$$",d:"Boutique hotel in an old department store, central."},
+    {id:"s9c",t:"Two-bedroom Airbnb downtown",where:"101 Reykjavík",drive:0,tags:["stays"],p:"$$–$$$",d:"Everyone together, kitchen for the Bónus haul.",link:"https://www.airbnb.com/s/Reykjavik--Iceland/homes?checkin=2026-10-09&checkout=2026-10-10&adults=3&min_bedrooms=2"}
+   ]
+  }},
+ {id:"2026-10-10", dow:"Sat", label:"Oct 10", title:"Golden Circle with Eva", region:"Þingvellir · Geysir · Gullfoss",
+  sun:"08:09 / 18:14", note:"Longest single drive is about an hour. End the day in the south so tomorrow starts close to the waterfalls.",
+  anchors:[],
+  paths:[
+   {k:"A",name:"Classic Circle + the new lagoon",d:"Rift walk, tomato lunch, Geysir and Gullfoss, Laugarás Lagoon, Ylja, sleep at Hotel Rangá.",
+    set:{morning:"m10a",midday:"d10a",afternoon:"a10a",dinner:"n10a",evening:"e10a",stay:"s10a"}},
+   {k:"B",name:"Saddle and soak",d:"Morning ride near Hveragerði, farm lunch, the old Secret Lagoon, Viking dinner, glass lodge.",
+    set:{morning:"m10c",midday:"d10b",afternoon:"a10c",dinner:"n10b",evening:"e10b",stay:"s10b"}},
+   {k:"C",name:"Snorkel the rift",d:"Silfra between the continents, Friðheimar, Laugarás Lagoon, glass igloos for the aurora.",
+    set:{morning:"m10b",midday:"d10a",afternoon:"a10b",dinner:"n10a",evening:"e10b",stay:"s10c"}}
+  ],
+  opts:{
+   morning:[
+    {id:"m10a",t:"Þingvellir rift walk",where:"Almannagjá, Þingvellir",drive:45,road:"Rte 36",from:"Reykjavík",tags:["sights","hiking","nature"],p:"Parking fee",d:"Walk the gorge between the plates to Öxarárfoss waterfall. Easy, about 1–2 hours."},
+    {id:"m10b",t:"Snorkel Silfra",where:"Þingvellir",drive:45,road:"Rte 36",from:"Reykjavík",tags:["nature","sights"],p:"$$$ (~$140)",d:"Drysuit snorkel in 2 °C glacier water between two plates, ~3 hours with Arctic Adventures.",saved:ig("passportarchives","reel/")},
+    {id:"m10c",t:"Horseback with Eldhestar",where:"Hveragerði",drive:40,road:"Rte 1",from:"Reykjavík",tags:["horses","nature"],p:"$$",d:"Big riding farm with rides from 1.5 hours, all year. Different terrain from your lava ride."}
+   ],
+   midday:[
+    {id:"d10a",t:"Friðheimar tomato greenhouse",where:"Reykholt",drive:50,road:"Rte 36 → 365 → 37 → 35",from:"Þingvellir",tags:["dining","culture"],p:"$$",d:"Book the lunch slot. There's a horse show barn on the farm too."},
+    {id:"d10b",t:"Efstidalur farm lunch",where:"Near Laugarvatn",drive:50,road:"Rte 35 → 37",from:"Hveragerði",tags:["dining","animals"],p:"$$",d:"Watch the cows while you eat their ice cream."},
+    {id:"d10c",t:"Fontana geothermal rye bread",where:"Laugarvatn",drive:30,road:"Rte 365",from:"Þingvellir",tags:["culture","hotsprings"],p:"$$",d:"Dig up bread baked in the hot sand, like you did Feb 7. Eva would love it.",done:DONE}
+   ],
+   afternoon:[
+    {id:"a10a",t:"Geysir & Gullfoss",where:"Haukadalur and Hvítá canyon",drive:20,road:"Rte 35",from:"Friðheimar",tags:["sights","waterfalls"],p:"Free",d:"Strokkur erupts every few minutes; Gullfoss is 10 minutes up the road. New for all three of you."},
+    {id:"a10b",t:"Laugarás Lagoon",where:"Laugarás",drive:10,road:"Rte 35",from:"Friðheimar",tags:["hotsprings"],p:"$$$",d:"Go for the late-afternoon light. Last entry 19:30.",saved:ig("icelandtravelguide.is","reel/")},
+    {id:"a10c",t:"Secret Lagoon (Gamla Laugin)",where:"Flúðir",drive:25,road:"Rte 30",from:"Efstidalur",tags:["hotsprings"],p:"$$",d:"Iceland's oldest pool, steaming with a little geyser alongside. Casual and warm."}
+   ],
+   dinner:[
+    {id:"n10a",t:"Ylja at Laugarás Lagoon",where:"Laugarás",drive:0,tags:["dining"],p:"$$$",d:"Stay after your soak. Then 55 minutes to Hella."},
+    {id:"n10b",t:"Ingólfsskáli Viking feast",where:"Ölfus",drive:40,road:"Rte 30 → 1",from:"Flúðir",tags:["dining","culture"],p:"$$$",d:"Drink from the horn.",saved:ig("cassiescompass","reel/DbjiYQJMmMu")},
+    {id:"n10c",t:"Dinner at Hotel Rangá",where:"Near Hella",drive:55,road:"Rte 30 → 1",from:"Laugarás",tags:["dining"],p:"$$$",d:"Lodge dining room with a deep wine list, steps from the aurora observatory."}
+   ],
+   evening:[
+    {id:"e10a",t:"Aurora wake-up call at Hotel Rangá",where:"Hotel Rangá",drive:0,tags:["aurora"],p:"",d:"The front desk will knock if the lights come out; there's an observatory and hot tubs by the river."},
+    {id:"e10b",t:"Hot tub & aurora at your lodge",where:"Hella area",drive:0,tags:["aurora","hotsprings"],p:"",d:"Clear skies are more common inland than on the coast."}
+   ],
+   stay:[
+    {id:"s10a",t:"Hotel Rangá",where:"Near Hella, Rte 1",drive:0,tags:["stays","aurora"],p:"$$$–$$$$",d:"Luxury log lodge on the Eystri-Rangá river. Suites fit the budget."},
+    {id:"s10b",t:"Panorama Glass Lodge – Hella",where:"Austurkrókur 1, Hella",drive:0,tags:["stays","aurora"],p:"$$$$",d:"Glass-walled cabins with private hot tubs. Each sleeps two, so book two lodges.",link:"https://panoramaglasslodge.com/locations-in-iceland/"},
+    {id:"s10c",t:"Aurora Igloo",where:"Near Hella, off the Ring Road",drive:0,tags:["stays","aurora"],p:"$$",d:"Clear heated pods with double beds; shared bathrooms. One pod for you two, one for Eva.",saved:ig("ilovewine","reel/")},
+    {id:"s10d",t:"Buubble (5 Million Star Hotel)",where:"Golden Circle",drive:0,tags:["stays","aurora"],p:"$$",d:"Bubble rooms in a birch forest."}
+   ]
+  }},
+ {id:"2026-10-11", dow:"Sun", label:"Oct 11", title:"South Coast for Eva", region:"Seljalandsfoss · Sólheimajökull · Vík",
+  sun:"08:12 / 18:11", note:"Hella → Vík is 1 h 15 with stops between. Waterfalls you know, a glacier you don't.",
+  anchors:[],
+  paths:[
+   {k:"A",name:"Waterfalls and the glacier",d:"Seljalandsfoss & Gljúfrabúi, Skógafoss, a Sólheimajökull glacier walk, Reynisfjara, Umi for dinner.",
+    set:{morning:"m11a",midday:"d11a",afternoon:"a11b",dinner:"n11a",evening:"e11a",stay:"s11a"}},
+   {k:"B",name:"Ice cave day",d:"Super-jeep into the Katla ice cave, black sand, lava show, sleep in Vík.",
+    set:{morning:"m11c",midday:"d11c",afternoon:"a11c",dinner:"n11c",evening:"e11a",stay:"s11b"}},
+   {k:"C",name:"Hidden pool",d:"Seljalandsfoss, the old Seljavallalaug pool hike, Skógafoss, back to Rangá.",
+    set:{morning:"m11a",midday:"d11a",afternoon:"a11a",dinner:"n11b",evening:"e11b",stay:"s11a"}}
+  ],
+  opts:{
+   morning:[
+    {id:"m11a",t:"Seljalandsfoss & Gljúfrabúi",where:"Rte 249",drive:30,road:"Rte 1 → 249",from:"Hella",tags:["waterfalls","hiking"],p:"Parking fee",d:"Walk behind one and squeeze into the canyon of the other. Bring rain gear.",done:DONE},
+    {id:"m11b",t:"Sólheimajökull glacier walk",where:"Rte 221",drive:60,road:"Rte 1 → 221",from:"Hella",tags:["hiking","nature"],p:"$$$",d:"Guided crampon hike on a glacier tongue, ~3 hours. Different glacier from your Feb hike.",saved:ig("allthingsiceland","reel/")},
+    {id:"m11c",t:"Katla ice cave by super jeep",where:"From Vík",drive:75,road:"Rte 1",from:"Hella",tags:["nature","sights"],p:"$$$ (~$200)",d:"3–4 hours, jeep across Mýrdalsjökull, crampons and helmets included. Runs year-round.",saved:ig("passportarchives","reel/")}
+   ],
+   midday:[
+    {id:"d11a",t:"Skógafoss and the top trail",where:"Skógar",drive:30,road:"Rte 1",from:"Seljalandsfoss",tags:["waterfalls","hiking"],p:"Free",d:"60 m falls; climb the 527 steps and walk the river a little way upstream.",done:DONE},
+    {id:"d11b",t:"Glacier walk (midday slot)",where:"Sólheimajökull",drive:10,road:"Rte 221",from:"Skógafoss",tags:["hiking","nature"],p:"$$$",d:"Book the midday departure if you do the waterfalls first."},
+    {id:"d11c",t:"Lunch in Vík",where:"Suður-Vík or the Vík food trucks",drive:0,tags:["dining"],p:"$$",d:"Simple and warm after the cave."}
+   ],
+   afternoon:[
+    {id:"a11a",t:"Seljavallalaug hidden pool",where:"Under Eyjafjöll",drive:15,road:"Rte 242",from:"Skógafoss",tags:["hotsprings","hiking"],p:"Free",d:"20-minute walk up a valley to a 1923 pool. Lukewarm and rustic, very photogenic."},
+    {id:"a11b",t:"Reynisfjara & Dyrhólaey",where:"Near Vík",drive:25,road:"Rte 1 → 215",from:"Sólheimajökull",tags:["sights","nature"],p:"Free",warn:"Sneaker waves kill people here. Stay well back from the water line.",d:"Basalt columns, sea stacks and the arch at Dyrhólaey."},
+    {id:"a11c",t:"Icelandic Lava Show",where:"Vík",drive:0,tags:["sights"],p:"$$",d:"Real molten lava poured indoors in front of you. Better than it sounds."}
+   ],
+   dinner:[
+    {id:"n11a",t:"Umi Hotel restaurant",where:"Under Eyjafjallajökull",drive:45,road:"Rte 1",from:"Vík",tags:["dining"],p:"$$$",d:"Nordic cooking with Japanese technique, on the way back toward Hella."},
+    {id:"n11b",t:"Hotel Rangá dinner",where:"Near Hella",drive:70,road:"Rte 1",from:"Vík",tags:["dining"],p:"$$$",d:"Second night at the lodge."},
+    {id:"n11c",t:"Dinner in Vík",where:"Vík",drive:0,tags:["dining"],p:"$$",d:"Hotel restaurants at Kría or Black Beach Suites if you sleep in Vík."}
+   ],
+   evening:[
+    {id:"e11a",t:"Aurora by the coast",where:"Away from Vík's lights",drive:10,road:"Rte 1",from:"Vík",tags:["aurora"],p:"",d:"Clouds roll off the sea here, so check the cloud map before driving."},
+    {id:"e11b",t:"Rangá observatory",where:"Hotel Rangá",drive:0,tags:["aurora"],p:"",d:"Ask about their stargazing sessions."}
+   ],
+   stay:[
+    {id:"s11a",t:"Hotel Rangá (2nd night)",where:"Near Hella",drive:0,tags:["stays","aurora"],p:"$$$–$$$$",d:"Two nights in one place is easier on everyone."},
+    {id:"s11b",t:"Black Beach Suites",where:"Vík",drive:0,tags:["stays"],p:"$$–$$$",d:"Modern suites near Reynisfjara with mountain views. 2 h 20 to Reykjavík tomorrow."},
+    {id:"s11c",t:"Umi Hotel",where:"Under Eyjafjallajökull",drive:0,tags:["stays"],p:"$$$",d:"Big windows facing the volcano and the sea."},
+    {id:"s11d",t:"Hótel Kría",where:"Vík",drive:0,tags:["stays"],p:"$$$",d:"Clean Nordic hotel at the edge of town."}
+   ]
+  }},
+ {id:"2026-10-12", dow:"Mon", label:"Oct 12", title:"Back west, last night", region:"Hveragerði · Reykjavík or Hvammsvík",
+  sun:"08:14 / 18:08", note:"Vík → Reykjavík is 2 h 20 at most, under the 3-hour rule. Break it up in Hveragerði.",
+  anchors:[],
+  paths:[
+   {k:"A",name:"Hot river hike, big dinner",d:"Reykjadalur's warm stream, pizza at a geothermal brewery, Sky Lagoon, Dill, last night out.",
+    set:{morning:"m12a",midday:"d12a",afternoon:"a12b",dinner:"n12a",evening:"e12a",stay:"s12a"}},
+   {k:"B",name:"One more ride",d:"Horses and hot springs in Hveragerði, then city shopping, ÓX, the bookstore bar.",
+    set:{morning:"m12c",midday:"d12b",afternoon:"a12c",dinner:"n12b",evening:"e12a",stay:"s12c"}},
+   {k:"C",name:"End where the aurora was",d:"Lava tunnel, then Hvammsvík's pools, Stormur seafood soup and a night on the fjord.",
+    set:{morning:"m12b",midday:"d12a",afternoon:"a12a",dinner:"n12c",evening:"e12b",stay:"s12b"}}
+  ],
+  opts:{
+   morning:[
+    {id:"m12a",t:"Reykjadalur hot river hike",where:"Above Hveragerði",drive:50,road:"Rte 1",from:"Hella",tags:["hiking","hotsprings","nature"],p:"Free (parking fee)",d:"About 3.5 km each way up a steaming valley, then bathe in the warm stream. Bring a swimsuit."},
+    {id:"m12b",t:"Raufarhólshellir lava tunnel",where:"Rte 39",drive:60,road:"Rte 1 → 39",from:"Hella",tags:["sights","nature"],p:"$$",d:"On the way back if you skipped it on day one."},
+    {id:"m12c",t:"Horse riding & hot springs, Hveragerði",where:"Hveragerði",drive:50,road:"Rte 1",from:"Hella",tags:["horses","hotsprings"],p:"$$$ (from ~$170)",d:"Ride out into the geothermal valley; tours run all year."}
+   ],
+   midday:[
+    {id:"d12a",t:"Ölverk pizza & brewery",where:"Hveragerði",drive:0,tags:["dining"],p:"$$",d:"Wood-fired pizza and beer brewed with geothermal steam."},
+    {id:"d12b",t:"Bæjarins Beztu, round two",where:"Reykjavík",drive:45,road:"Rte 1",from:"Hveragerði",tags:["dining"],p:"$",d:"Nobody ever regrets the second hot dog.",saved:ig("iceland.explore","p/DTtFKC5ARC9")},
+    {id:"d12c",t:"Hlemmur Mathöll",where:"Reykjavík",drive:45,road:"Rte 1",from:"Hveragerði",tags:["dining"],p:"$$",d:"Food hall, everyone picks."}
+   ],
+   afternoon:[
+    {id:"a12a",t:"Hvammsvík Hot Springs",where:"Hvalfjörður",drive:75,road:"Rte 1 → 47",from:"Hveragerði",tags:["hotsprings","nature"],p:"$$",d:"Your February favourite, now with Eva. Last entry 19:00.",done:DONE},
+    {id:"a12b",t:"Sky Lagoon",where:"Kópavogur",drive:40,road:"Rte 1",from:"Hveragerði",tags:["hotsprings"],p:"$$$",d:"Sunset soak before the last dinner."},
+    {id:"a12c",t:"Last shopping run",where:"Laugavegur, Kiosk Grandi, 66°North",drive:0,tags:["shopping","coffee"],p:"$$",d:"Sweaters, design, gifts, one more latte."}
+   ],
+   dinner:[
+    {id:"n12a",t:"Dill",where:"Laugavegur 59",drive:0,tags:["dining"],p:"$$$$",d:"Iceland's first Michelin star. A proper last-night dinner. Book now."},
+    {id:"n12b",t:"ÓX",where:"Laugavegur 55",drive:0,tags:["dining"],p:"$$$$",d:"17 seats; three of you fits the counter well."},
+    {id:"n12c",t:"Stormur Bistro at Hvammsvík",where:"Hvammsvík",drive:0,tags:["dining"],p:"$$",d:"Seafood soup with the fjord outside."}
+   ],
+   evening:[
+    {id:"e12a",t:"Last night out",where:"Bookstore bar → Kaffibarinn",drive:0,tags:["nightlife"],p:"$$",d:"Start with the live music, end wherever Eva wants."},
+    {id:"e12b",t:"Aurora on Hvalfjörður",where:"Hvammsvík shore",drive:0,tags:["aurora"],p:"",d:"Same view as your best night in February.",done:DONE}
+   ],
+   stay:[
+    {id:"s12a",t:"The Reykjavík EDITION",where:"By Harpa",drive:0,tags:["stays"],p:"$$$$",d:"45 minutes to KEF in the morning."},
+    {id:"s12b",t:"Hvammsvík Lake House",where:"Hvalfjörður",drive:0,tags:["stays","hotsprings","aurora"],p:"$$$$",d:"Whole house by the springs. About 1 h 30 to KEF; leave by 8:15.",link:"https://www.airbnb.com/rooms/35696476"},
+    {id:"s12c",t:"Two-bedroom Airbnb downtown",where:"101 Reykjavík",drive:0,tags:["stays"],p:"$$–$$$",d:"Walk home from the bars.",link:"https://www.airbnb.com/s/Reykjavik--Iceland/homes?checkin=2026-10-12&checkout=2026-10-13&adults=3&min_bedrooms=2"},
+    {id:"s12d",t:"Reykjavík Konsúlat Hotel",where:"Hafnarstræti",drive:0,tags:["stays"],p:"$$$",d:"Central and quieter than the EDITION."}
+   ]
+  }},
+ {id:"2026-10-13", dow:"Tue", label:"Oct 13", title:"Fly home", region:"Reykjavík → KEF",
+  sun:"08:17 / 18:03", note:"Flights around noon. Be at KEF by about 10:00 with the car returned.",
+  anchors:[{t:"~10:00",x:"Return the car and check in at KEF (flights ~12:00)"}],
+  paths:[
+   {k:"A",name:"Slow breakfast",d:"Sandholt, then straight to the airport.",set:{morning:"m13a"}},
+   {k:"B",name:"Stock up",d:"Bónus for skyr, licorice and chocolate to bring home.",set:{morning:"m13c"}}
+  ],
+  opts:{
+   morning:[
+    {id:"m13a",t:"Breakfast at Sandholt",where:"Laugavegur 36",drive:45,road:"Rte 41",from:"to KEF",tags:["coffee"],p:"$$",d:"Opens early. Leave Reykjavík by 9:00."},
+    {id:"m13b",t:"BakaBaka",where:"Bankastræti 2",drive:45,road:"Rte 41",from:"to KEF",tags:["coffee"],p:"$",d:"Quick pastry and latte."},
+    {id:"m13c",t:"Bónus souvenir haul",where:"Any Bónus",drive:45,road:"Rte 41",from:"to KEF",tags:["shopping"],p:"$",d:"Cheaper than the duty-free for candy and skyr."}
+   ]
+  }}
+];
+
+/* ---------- Weather (yr.no point forecasts, fetched Sat Oct 3 2026) ---------- */
+const WX_FETCHED = "Sat Oct 3, 12:30 ET";
+const LOCS = {rvk:"Reykjavík", kef:"Reykjanes / KEF", golden:"Golden Circle", hella:"Hella", vik:"Vík & Skógar", husafell:"Húsafell", hvera:"Hveragerði", hvamm:"Hvammsvík"};
+// [high °C, low °C, precip mm, wind m/s, description]
+const WX = {
+ rvk:{ "2026-10-07":[8,4,2.2,5,"Rain overnight, then partly cloudy"], "2026-10-08":[10,6,25,16,"Heavy rain and strong wind"], "2026-10-09":[8,3,7,6,"Rain, clearing in the evening"], "2026-10-10":[4,0,0,6,"Fair to partly cloudy, dry"], "2026-10-11":[5,-2,7.7,7,"Partly cloudy morning, heavy rain evening"], "2026-10-12":[9,5,16,10,"Rain all day"] },
+ kef:{ "2026-10-07":[8,5,1.1,5,""], "2026-10-08":[10,7,19,16,""], "2026-10-09":[9,5,4.8,9,""], "2026-10-10":[5,2,0,8,""], "2026-10-11":[7,2,6.2,8,""], "2026-10-12":[10,6,14,11,""] },
+ golden:{ "2026-10-07":[8,2,1.3,1,"Mixed, mostly cloudy"], "2026-10-08":[9,5,17,6,"Heavy rain morning to afternoon"], "2026-10-09":[7,3,10,5,"Showers, improving in the evening"], "2026-10-10":[4,1,0,5,"Fair and dry"], "2026-10-11":[6,-2,3.3,7,"Cloudy, rain in the evening"], "2026-10-12":[8,4,16,10,"Heavy showers"] },
+ hella:{ "2026-10-07":[9,2,2.6,4,""], "2026-10-08":[10,6,17,14,""], "2026-10-09":[8,3,12,7,""], "2026-10-10":[5,0,0,6,"Dry and clear"], "2026-10-11":[6,-1,2.1,6,""], "2026-10-12":[10,5,13,8,""] },
+ vik:{ "2026-10-07":[8,6,2,7,"Rain early, fair afternoon"], "2026-10-08":[11,8,37,9,"Heavy rain all day"], "2026-10-09":[9,6,17,13,"Showers and heavy rain, windy"], "2026-10-10":[7,2,0.1,7,"Clearing to sunny"], "2026-10-11":[7,3,20,11,"Partly cloudy morning, heavy rain afternoon"], "2026-10-12":[10,7,24,17,"Heavy rain, gale-force wind"] },
+ husafell:{ "2026-10-07":[6,0,1.1,2,"Light sleet overnight, then fair"], "2026-10-08":[9,5,15,14,"Heavy rain and strong wind"], "2026-10-09":[7,1,5.4,4,""], "2026-10-10":[2,-1,1.1,6,"Light snow in the morning"], "2026-10-11":[4,-2,1,2,"Clear morning, light rain evening"], "2026-10-12":[7,3,12,5,"Heavy rain"] },
+ hvera:{ "2026-10-07":[8,4,4.7,4,""], "2026-10-08":[9,6,27,11,""], "2026-10-09":[7,2,9.6,6,""], "2026-10-10":[4,0,0,8,"Dry, breezy"], "2026-10-11":[5,-2,4.8,5,""], "2026-10-12":[9,4,24,8,""] },
+ hvamm:{ "2026-10-07":[8,4,2.1,2,""], "2026-10-08":[9,6,21,11,""], "2026-10-09":[8,2,9.5,4,""], "2026-10-10":[3,0,0.1,5,"Dry and cold"], "2026-10-11":[6,-1,2.6,4,""], "2026-10-12":[9,5,12,6,""] }
+};
+const NORMAL = [7,2,null,7,"October average: showers likely"]; // beyond forecast range
+const DAY_WX = {
+ "2026-10-07":"Mild and mostly dry after early rain. Partly cloudy evening gives a fair aurora chance.",
+ "2026-10-08":"The stormy day of the week: 15–37 mm of rain and wind to 14–16 m/s across the south and west. Lean on lagoons, the lava tunnel, Friðheimar and long dinners. Horse and glacier tours may cancel; operators usually message in the morning.",
+ "2026-10-09":"Rain into the afternoon, clearing in the evening. A lagoon morning works fine in the rain.",
+ "2026-10-10":"Best day of the week on this forecast: dry, clear and cold (about 0–5 °C). Do the outdoor-heavy path, and this is the best aurora night so far.",
+ "2026-10-11":"Dry, cold morning, then heavy rain on the coast from mid-afternoon (Vík ~20 mm, 11 m/s). Do waterfalls and the glacier early; save the Lava Show for the wet part.",
+ "2026-10-12":"Rain everywhere, heavy on the south coast with gales near Vík (17 m/s). Leave the south early. Hot springs are still great in the rain; the Reykjadalur trail will be soaked.",
+ "2026-10-13":"Beyond the forecast range. October in Reykjavík averages about 7 °C high and 2 °C low, with showers likely."
+};
+// option id -> [location, activity kind]
+const LK = {
+ m7a:"rvk cafe",m7b:"rvk cafe",m7c:"rvk city",d7a:"hvera cave",d7b:"rvk lagoon",d7c:"rvk rest",a7a:"rvk city",a7b:"rvk city",a7c:"rvk walk",a7d:"hvamm lagoon",n7a:"rvk fine",n7b:"rvk dinner",n7c:"rvk dinner",n7d:"hvamm dinner",e7a:"rvk night",e7b:"rvk aurora",e7c:"hvamm aurora",s7a:"rvk stay",s7b:"rvk stay",s7c:"rvk stay",s7d:"hvamm stay",
+ m8a:"rvk horse",m8b:"golden hike",m8c:"husafell view",m8d:"golden hike",m8e:"hvera cave",d8a:"golden meal",d8b:"golden meal",d8c:"husafell meal",a8a:"golden lagoon",a8b:"golden view",a8c:"husafell lagoon",a8d:"husafell glacier",n8a:"golden fine",n8b:"hvera dinner",n8c:"husafell dinner",e8a:"golden aurora",e8b:"husafell aurora",s8a:"golden stay",s8b:"husafell stay",s8c:"golden stay",s8d:"golden stay",
+ m9a:"rvk lagoon",m9b:"kef view",m9c:"rvk cafe",d9a:"rvk city",d9b:"rvk city",d9c:"rvk city",a9a:"rvk horse",a9b:"rvk city",a9c:"rvk city",n9a:"rvk dinner",n9b:"rvk dinner",n9c:"rvk fine",e9a:"rvk night",e9b:"rvk night",e9c:"rvk night",s9a:"rvk stay",s9b:"rvk stay",s9c:"rvk stay",
+ m10a:"golden hike",m10b:"golden snorkel",m10c:"hvera horse",d10a:"golden meal",d10b:"golden meal",d10c:"golden meal",a10a:"golden falls",a10b:"golden lagoon",a10c:"golden lagoon",n10a:"golden fine",n10b:"hvera dinner",n10c:"hella fine",e10a:"hella aurora",e10b:"hella aurora",s10a:"hella stay",s10b:"hella stay",s10c:"hella stay",s10d:"golden stay",
+ m11a:"hella falls",m11b:"vik glacier",m11c:"vik icecave",d11a:"vik falls",d11b:"vik glacier",d11c:"vik meal",a11a:"vik pool",a11b:"vik beach",a11c:"vik indoor",n11a:"vik fine",n11b:"hella fine",n11c:"vik dinner",e11a:"vik aurora",e11b:"hella aurora",s11a:"hella stay",s11b:"vik stay",s11c:"vik stay",s11d:"vik stay",
+ m12a:"hvera hotriver",m12b:"hvera cave",m12c:"hvera horse",d12a:"hvera meal",d12b:"rvk city",d12c:"rvk city",a12a:"hvamm lagoon",a12b:"rvk lagoon",a12c:"rvk city",n12a:"rvk fine",n12b:"rvk fine",n12c:"hvamm dinner",e12a:"rvk night",e12b:"hvamm aurora",s12a:"rvk stay",s12b:"hvamm stay",s12c:"rvk stay",s12d:"rvk stay",
+ m13a:"rvk cafe",m13b:"rvk cafe",m13c:"rvk city"
+};
+const KP_FALLBACK = {"2026-10-07":3,"2026-10-08":3,"2026-10-09":2,"2026-10-10":2,"2026-10-11":3,"2026-10-12":3,"2026-10-13":3};
+const KP_FALLBACK_SRC = "NOAA 27-day outlook issued 2026-09-28";
+const MOON = {"2026-10-07":13,"2026-10-08":7,"2026-10-09":2,"2026-10-10":0,"2026-10-11":0,"2026-10-12":3,"2026-10-13":7}; // % lit
+let LIVE = null; // weather document from /api/state
+let refreshState = "";
+const WX_SAFE_KINDS = {horse:1,glacier:1,icecave:1,snorkel:1};
+function wxFor(loc, day){
+  const lv = LIVE && LIVE.locs && LIVE.locs[loc] && LIVE.locs[loc][day];
+  if(lv && typeof lv.hi==="number") return {hi:lv.hi,lo:lv.lo,mm:(typeof lv.mm==="number"?lv.mm:null),wind:lv.wind,desc:lv.desc||wxDesc([lv.hi,lv.lo,lv.mm||0,lv.wind]),normal:false};
+  if(LIVE && LIVE.locs && LIVE.locs[loc] && !lv && day>"2026-10-12") return {hi:NORMAL[0],lo:NORMAL[1],mm:null,wind:NORMAL[3],desc:NORMAL[4],normal:true};
+  const w = WX[loc] && WX[loc][day]; return w ? {hi:w[0],lo:w[1],mm:w[2],wind:w[3],desc:w[4]||wxDesc(w),normal:false} : {hi:NORMAL[0],lo:NORMAL[1],mm:null,wind:NORMAL[3],desc:NORMAL[4],normal:true}; }
+function kpFor(day){ const k = LIVE && LIVE.kp && LIVE.kp[day]; return k && typeof k.kp==="number" ? {kp:k.kp, src:k.src||"NOAA"} : {kp:KP_FALLBACK[day], src:KP_FALLBACK_SRC}; }
+function noteFor(day){ return (LIVE && LIVE.notes && LIVE.notes[day]) || DAY_WX[day] || ""; }
+function auroraFor(day, loc){
+  const w = wxFor(loc, day), k = kpFor(day), moon = MOON[day];
+  const mm = w.mm==null ? 3 : w.mm;
+  let rate, why;
+  const lv = LIVE && LIVE.locs && LIVE.locs[loc] && LIVE.locs[loc][day];
+  const cloud = lv && typeof lv.cloud==="number" ? lv.cloud : null;
+  if(cloud!=null){
+    if(cloud>=80){ rate="Poor"; why=`Evening cloud ${cloud}%`; }
+    else if(cloud>=50){ rate = k.kp>=4 ? "Fair" : "Low"; why=`Evening cloud ${cloud}%, watch for gaps`; }
+    else if(cloud>=25){ rate = k.kp>=3 ? "Good" : "Fair"; why=`Evening cloud ${cloud}%`; }
+    else { rate = k.kp>=4 ? "Excellent" : k.kp>=2 ? "Good" : "Fair"; why=`Mostly clear evening (${cloud}% cloud)`; }
+    return {rate, why, kp:k.kp, src:k.src, moon, w};
+  }
+  if(mm>=5){ rate="Poor"; why="Rain and thick cloud forecast"; }
+  else if(mm>=1){ rate = k.kp>=4 || (k.kp>=3 && mm<3) ? "Fair" : "Low"; why="Showers mean broken cloud at best"; }
+  else { rate = k.kp>=4 ? "Excellent" : k.kp>=2 ? "Good" : "Fair"; why="Dry forecast, so skies may clear"; }
+  return {rate, why, kp:k.kp, src:k.src, moon, w};
+}
+function wxDesc(w){ const mm=w[2], wind=w[3]; let s = mm>=15?"Heavy rain":mm>=5?"Rain":mm>=1?"Showers":"Dry"; if(wind>=13) s+=", strong wind"; else if(wind>=9) s+=", windy"; return s; }
+const toF = c => Math.round(c*9/5+32);
+const mph = ms => Math.round(ms*2.237);
+function wear(kind, w){
+  if(!kind || kind==="stay" || kind==="rest") return null;
+  const wet = w.mm==null ? true : w.mm>=1, soaked = w.mm!=null && w.mm>=10, windy = w.wind>=10, cold = w.lo<=1 || w.hi<=5 || windy;
+  const out = [];
+  const indoorish = {fine:1,dinner:1,meal:1,night:1,indoor:1,cafe:1};
+  // core outfit by temperature
+  if(!indoorish[kind]){
+    out.push(cold ? "thermal base layer" : "light base layer");
+    out.push(cold ? "wool sweater or fleece + insulated jacket" : "fleece or lopapeysa");
+    if(cold) out.push("hat and gloves");
+  }
+  // shell by rain / wind
+  if(soaked && !indoorish[kind]) out.push("waterproof jacket and rain pants");
+  else if((wet||windy) ) out.push(indoorish[kind] ? "packable rain jacket for the walk" : "waterproof, windproof shell");
+  const K = {
+    lagoon:["swimsuit","flip-flops","beanie for your head in the water"+(windy?" (it'll be windy)":""),"leave silver jewelry at home (it tarnishes)"],
+    pool:["swimsuit under your clothes","quick-dry towel","waterproof boots for the 20-min walk"],
+    hotriver:["swimsuit under your layers","quick-dry towel","waterproof hiking boots","no changing rooms, just wooden screens"],
+    hike:["waterproof hiking boots with grip","quick-dry pants, not jeans", soaked?"gaiters; the trail will be muddy":"", w.lo<=0?"microspikes if it freezes overnight":""],
+    falls:["rain pants even if it's dry: the spray soaks you","waterproof boots","phone in a zip pocket"],
+    view:["waterproof shoes","hood up for the viewpoints"],
+    walk:["waterproof shoes"],
+    city:["waterproof sneakers or boots","crossbody bag"],
+    cafe:["waterproof sneakers or boots"],
+    glacier:["waterproof pants","stiff ankle boots (crampons strap on; rentals available)","gloves","sunglasses for glare"],
+    icecave:["waterproof pants","warm ankle boots","gloves; helmets and crampons are provided"],
+    cave:["warm layer: it's 0–5 °C inside year-round","sturdy shoes","gloves; helmets are provided"],
+    horse:["snug long pants, no jeans if wet","boots with a small heel","gloves","no loose scarves; farms lend rain suits and helmets"],
+    snorkel:["thermal base layer and wool socks under the drysuit","hat and warm drink for after"],
+    beach:["windproof shell, hood up","warm hat","boots you can run in: stay far back from the waves"],
+    indoor:["layers you can take off"],
+    meal:["casual is fine"],
+    dinner:["smart casual: dark jeans and a nice sweater"],
+    fine:["smart casual is right even at Michelin places; no jacket or tie needed"],
+    night:["layers you can shed (bars run warm)","a coat you can check","comfortable shoes, ID"],
+    aurora:["everything warm: insulated jacket, hat, gloves, warm boots","thermos of something hot","phone in night mode, small tripod"]
+  };
+  (K[kind]||[]).forEach(x=>x&&out.push(x));
+  return [...new Set(out)];
+}
+function wxFlag(kind, w){
+  if(w.normal) return "";
+  if(WX_SAFE_KINDS[kind] && w.wind>=13) return `Wind ${w.wind} m/s forecast: this tour may be cancelled. Have a backup.`;
+  if((kind==="hike"||kind==="hotriver") && w.mm>=15) return `${w.mm} mm of rain forecast: trails will be soaked and slippery.`;
+  if(kind==="beach" && w.wind>=10) return `Wind ${w.wind} m/s: big surf. Keep well back.`;
+  if(kind==="aurora"){ return w.mm===0 || w.mm<0.5 ? "Dry forecast: good aurora odds if skies stay clear." : w.mm>=5 ? "Rain forecast: aurora unlikely tonight." : ""; }
+  return "";
+}
+
+/* ---------- Helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const PALETTE = ["--bob","--amanda","--eva","--t4","--t5"];
+const mapUrl = o => "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(o.t+", "+(o.where||"")+", Iceland");
+const fmtDrive = m => m>=60 ? Math.floor(m/60)+" h"+(m%60?" "+(m%60):"") : m+" min";
+const OPT = {}; DAYS.forEach(d=>Object.entries(d.opts).forEach(([s,arr])=>arr.forEach(o=>OPT[o.id]={...o,slot:s,day:d.id})));
+const MAX_DRIVE = 180;
+
+/* ---------- State ---------- */
+let travelers = [];   // from db
+let picks = {};       // key day|slot|traveler -> optionId
+let db = null, canWrite = true;
+let view = "day", dayId = DAYS[0].id;
+let me = null;
+try{ me = localStorage.getItem("ice26-me"); const v=localStorage.getItem("ice26-view"); if(v) view=v; const d=localStorage.getItem("ice26-day"); if(d && DAYS.some(x=>x.id===d)) dayId=d; }catch(e){}
+
+function colorOf(t){ const i = travelers.findIndex(x=>x.id===t.id); return "var("+(t.color||PALETTE[i%PALETTE.length])+")"; }
+function present(t, day){
+  const a = t.arriveDate||DAYS[0].id, b = t.departDate||DAYS[DAYS.length-1].id;
+  return day>=a && day<=b;
+}
+function here(day){ return travelers.filter(t=>present(t,day)); }
+function fullGroup(day){ return travelers.length>0 && here(day).length===travelers.length; }
+function avatar(t,size){ return `<span class="av" style="background:${colorOf(t)}${size?`;width:${size}px;height:${size}px`:""}" aria-hidden="true">${esc((t.name||"?")[0])}</span>`; }
+function pickKey(d,s,t){ return d+"|"+s+"|"+t; }
+
+/* ---------- Render ---------- */
+function renderMe(){
+  const sel = $("#meSel");
+  sel.innerHTML = `<option value="">Choose…</option>`+travelers.map(t=>`<option value="${esc(t.id)}" ${t.id===me?"selected":""}>${esc(t.name)}</option>`).join("");
+}
+function renderStrip(){
+  $("#dayStrip").hidden = (view==="trip");
+  $("#dayStrip").innerHTML = DAYS.map(d=>{
+    const h = here(d.id);
+    return `<button data-day="${d.id}" aria-current="${d.id===dayId}"><b>${d.dow} ${d.label.split(" ")[1]}</b><span>${esc(d.region.split(" · ")[0])}</span><br><span class="dots">${h.map(t=>`<i class="dot" style="background:${colorOf(t)}"></i>`).join("")}</span></button>`;
+  }).join("");
+  ["day","sched","trip"].forEach(v=>$("#tab-"+v).setAttribute("aria-selected", v===view));
+}
+function render(){
+  renderMe(); renderStrip();
+  const el = $("#view");
+  if(view==="day") el.innerHTML = renderDay(); else if(view==="sched") el.innerHTML = renderSched(); else el.innerHTML = renderTrip();
+}
+
+function fitsFor(o, ppl){
+  return ppl.filter(t=>(t.interests||[]).some(i=>o.tags.includes(i)));
+}
+function renderOpt(o, d, ppl){
+  const [loc,kind] = (LK[o.id]||"rvk city").split(" ");
+  const w = wxFor(loc, d.id); const wr = wear(kind, w); const flag = wxFlag(kind, w);
+  const over = o.drive>MAX_DRIVE && fullGroup(d.id);
+  const mineSel = me && picks[pickKey(d.id,o.slot,me)]===o.id;
+  const fits = fitsFor(o, ppl);
+  return `<article class="opt ${mineSel?"mine":""}">
+    <div class="meta">
+      ${o.drive?`<span class="sign ${over?"over":""}" title="Drive from ${esc(o.from||"")}">${esc(o.road||"")} · ${fmtDrive(o.drive)}${o.from?" from "+esc(o.from):""}</span>`:""}
+      ${o.p?`<span class="price">${esc(o.p)}</span>`:""}
+      ${kind!=="stay"&&kind!=="rest"?`<span class="wxpill" title="${esc(LOCS[loc])} forecast">${w.hi}°/${w.lo}°C${w.mm!=null?" · "+w.mm+" mm":""} · ${w.wind} m/s</span>`:""}
+    </div>
+    <h4>${esc(o.t)}</h4>
+    <p>${esc(o.d)}</p>
+    <div class="meta">
+      ${o.done?`<span class="tag done">${o.done} · Bob & Amanda</span>`:""}
+      ${o.saved?`<a class="tag saved" href="${esc(o.saved.url)}" target="_blank" rel="noopener">Saved · @${esc(o.saved.handle)}</a>`:""}
+      ${o.warn?`<span class="tag warn">${esc(o.warn)}</span>`:""}
+      ${over?`<span class="tag warn">Over the 3-hour drive rule for this day</span>`:""}
+      ${flag?`<span class="tag ${/good/.test(flag)?"done":"warn"}">${esc(flag)}</span>`:""}
+    </div>
+    ${wr?`<details class="wear"><summary>What to wear</summary><ul>${wr.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></details>`:""}
+    ${fits.length?`<div class="fits">Fits ${fits.map(t=>avatar(t,16)+esc(t.name)).join(", ")}</div>`:""}
+    <div class="links"><a href="${mapUrl(o)}" target="_blank" rel="noopener">Map</a>${o.link?`<a href="${esc(o.link)}" target="_blank" rel="noopener">Book / browse</a>`:""}</div>
+    <div class="pickrow"><span class="lbl">Pick:</span>${ppl.map(t=>{
+      const on = picks[pickKey(d.id,o.slot,t.id)]===o.id;
+      return `<button class="pk" style="color:${colorOf(t)}" aria-pressed="${on}" data-pick="${o.id}" data-t="${esc(t.id)}" ${canWrite&&db?"":"disabled"}>${avatar(t)}<span style="color:var(--ink)">${esc(t.name)}</span></button>`;
+    }).join("")}</div>
+  </article>`;
+}
+function renderDay(){
+  const d = DAYS.find(x=>x.id===dayId); const ppl = here(d.id);
+  const mt = travelers.find(t=>t.id===me);
+  return `<section class="dayhead">
+      <div class="eyebrow">${d.dow} ${d.label}, 2026 · ${esc(d.region)}</div>
+      <h2>${esc(d.title)}</h2>
+      <p class="lede">${esc(d.note)}</p>
+      <div class="facts"><span>Sunrise / sunset <b>${d.sun}</b></span><span>Drive rule <b>${fullGroup(d.id)?"≤ 3 h per drive":"none (before Eva arrives)"}</b></span></div>
+      <div class="who">${ppl.length?ppl.map(t=>`<span class="chip">${avatar(t)}${esc(t.name)}</span>`).join(""):`<span class="empty">Add travelers on the Trip tab to see who's here.</span>`}</div>
+      ${d.anchors.map(a=>`<div class="anchor"><time>${esc(a.t)}</time><span>${esc(a.x)}</span></div>`).join("")}
+    </section>
+    ${renderWx(d)}
+    <section>
+      <div class="slothead"><h3>Pick a path</h3><span class="eyebrow">sets every slot below</span></div>
+      <div class="paths">${d.paths.map(p=>`<div class="path"><span class="k">PATH ${p.k}</span><strong>${esc(p.name)}</strong><p>${esc(p.d)}</p>
+        <div class="acts"><button class="btn primary" data-path="${p.k}" data-scope="me" ${db&&canWrite&&mt&&present(mt,d.id)?"":"disabled"}>${mt?"Take it as "+esc(mt.name):"Choose who you are first"}</button>
+        <button class="btn" data-path="${p.k}" data-scope="all" ${db&&canWrite&&ppl.length?"":"disabled"}>Everyone</button></div></div>`).join("")}</div>
+    </section>
+    ${SLOTS.filter(s=>d.opts[s.id]).map(s=>`<section class="slot"><div class="slothead"><h3>${s.name}</h3><span class="eyebrow">${s.time}</span></div>
+      <div class="opts">${d.opts[s.id].map(o=>renderOpt(OPT[o.id],d,ppl)).join("")}</div></section>`).join("")}`;
+}
+
+function dayLocs(d){ const seen=[]; Object.values(d.opts).flat().forEach(o=>{ const l=(LK[o.id]||"rvk").split(" ")[0]; if(!seen.includes(l)) seen.push(l); }); return seen; }
+function packFor(d, tid){
+  const items = new Set();
+  SLOTS.forEach(s=>{ const oid = tid && picks[pickKey(d.id,s.id,tid)]; if(!oid) return; const [loc,kind]=(LK[oid]||"rvk city").split(" "); (wear(kind, wxFor(loc,d.id))||[]).forEach(x=>items.add(x)); });
+  items.delete("casual is fine");
+  if(items.has("waterproof jacket and rain pants")||items.has("waterproof, windproof shell")) items.delete("packable rain jacket for the walk");
+  return [...items];
+}
+function updatedLabel(){
+  if(!LIVE || !LIVE.fetchedAt) return WX_FETCHED;
+  const t = new Date(LIVE.fetchedAt); if(isNaN(t)) return WX_FETCHED;
+  const mins = Math.round((Date.now()-t.getTime())/60000);
+  const ago = mins<60 ? mins+" min ago" : mins<48*60 ? Math.round(mins/60)+" h ago" : Math.round(mins/1440)+" days ago";
+  return ago + (refreshState ? " · "+refreshState : "");
+}
+function auroraCard(d){
+  if(d.id==="2026-10-13") return "";
+  const evOpt = (d.opts.evening||[])[0] || (d.opts.stay||[])[0];
+  const loc = evOpt ? (LK[evOpt.id]||"rvk").split(" ")[0] : "rvk";
+  const a = auroraFor(d.id, loc);
+  const cls = a.rate==="Excellent"||a.rate==="Good" ? "" : a.rate==="Poor" ? "storm" : "wet";
+  return `<div class="wxc aur ${cls}" style="margin-top:8px">
+    <span class="l">Northern Lights tonight · ${esc(LOCS[loc])}</span>
+    <span class="t">${esc(a.rate)} <small>Kp ${a.kp} · moon ${a.moon}% lit</small></span>
+    <span class="n">${esc(a.why)}. Kp ${a.kp} is ${a.kp>=4?"strong; it can fill the sky":a.kp>=3?"moderate; easily visible this far north":a.kp>=2?"quiet but often visible overhead in Iceland":"very quiet"}. The moon is ${a.moon<10?"near new, so skies are dark":"thin"}.</span>
+    <span class="n">Dark from about 19:30; best 22:00–01:00. On the day, check cloud cover on the <a href="https://en.vedur.is/weather/forecasts/aurora/" target="_blank" rel="noopener">Icelandic Met Office aurora map</a>. Kp source: ${esc(a.src)}.</span>
+  </div>`;
+}
+function renderWx(d){
+  const locs = dayLocs(d);
+  const cards = locs.map(l=>{ const w=wxFor(l,d.id); const cls = w.wind>=13||w.mm>=20 ? "storm" : (w.mm||0)>=5 ? "wet" : "";
+    return `<div class="wxc ${cls}"><span class="l">${esc(LOCS[l])}</span><span class="t">${w.hi}° <small>/ ${w.lo}°C · ${toF(w.hi)}/${toF(w.lo)}°F</small></span>
+      <span class="n">${esc(w.desc)}</span><span class="n">${w.mm!=null?w.mm+" mm rain · ":""}wind ${w.wind} m/s (${mph(w.wind)} mph)</span></div>`; }).join("");
+  const mt = travelers.find(t=>t.id===me);
+  const pack = mt && present(mt,d.id) ? packFor(d, me) : [];
+  return `<section><div class="slothead"><h3>Weather</h3><span class="eyebrow">MET Norway / yr.no · updated ${esc(updatedLabel())}</span></div>
+    <p class="lede" style="margin:0 0 10px">${esc(noteFor(d.id))}</p>
+    <div class="wx">${cards}</div>
+    ${auroraCard(d)}
+    <div style="margin-top:12px"><div class="eyebrow" style="margin-bottom:6px">${mt?"Pack today for "+esc(mt.name)+"’s picks":"Pack today"}</div>
+    ${pack.length?`<div class="pack">${pack.map(x=>`<span>${esc(x)}</span>`).join("")}</div>`:`<p class="empty" style="margin:0">${mt?"Pick a few things below and this fills in with what to wear for them.":"Choose who you are at the top, make picks, and this lists what to wear for them."}</p>`}</div>
+  </section>`;
+}
+function renderSchedDay(d){
+  const ppl = here(d.id);
+  if(!ppl.length) return `<p class="empty">No travelers on this day.</p>`;
+  const rows = SLOTS.filter(s=>d.opts[s.id]).map(s=>{
+    const ids = ppl.map(t=>picks[pickKey(d.id,s.id,t.id)]).filter(Boolean);
+    const uniq = [...new Set(ids)];
+    const agree = ids.length===ppl.length && uniq.length===1;
+    const flag = ids.length===0 ? "" : agree ? `<span class="same">Together</span>` : uniq.length>1 ? `<span class="split">Split</span>` : `<span class="split">Waiting on picks</span>`;
+    return `<tr><td class="slotc">${s.name}<span>${s.time}</span>${flag}</td>${ppl.map(t=>{
+      const o = OPT[picks[pickKey(d.id,s.id,t.id)]];
+      let wl="";
+      if(o){ const [loc,kind]=(LK[o.id]||"rvk city").split(" "); const w=wxFor(loc,d.id); const wr=wear(kind,w); wl = (kind!=="stay"&&kind!=="rest"?`${w.hi}°/${w.lo}°C, ${w.mm!=null?w.mm+" mm":"avg"}`:"") + (wr?" · Wear: "+wr.slice(0,3).join(", "):""); }
+      return `<td>${o?`<div class="cell"><b>${esc(o.t)}</b><small>${esc(o.where||"")}${o.drive?" · "+fmtDrive(o.drive):""}</small>${wl?`<span class="w">${esc(wl)}</span>`:""}</div>`:`<span class="empty">Not picked</span>`}</td>`;
+    }).join("")}</tr>`;
+  }).join("");
+  return `<div class="sched"><table><thead><tr><th>${d.dow} ${d.label}</th>${ppl.map(t=>`<th><span class="chip" style="border:0;padding:0;background:none">${avatar(t)}${esc(t.name)}</span></th>`).join("")}</tr></thead>
+    <tbody>${d.anchors.map(a=>`<tr><td class="slotc">${esc(a.t)}</td><td colspan="${ppl.length}">${esc(a.x)}</td></tr>`).join("")}${rows}</tbody></table></div>`;
+}
+function renderSched(){
+  const d = DAYS.find(x=>x.id===dayId);
+  const totals = DAYS.map(x=>{ const ppl=here(x.id); const n=SLOTS.filter(s=>x.opts[s.id]).length*ppl.length; let got=0; ppl.forEach(t=>SLOTS.forEach(s=>{ if(picks[pickKey(x.id,s.id,t.id)]) got++; })); return {x,got,n}; });
+  return `<section class="dayhead"><div class="eyebrow">Schedule</div><h2>${d.dow} ${d.label}: ${esc(d.title)}</h2>
+    <p class="lede">Each column is one person's picks. "Split" means you've chosen different things for that slot, which is fine if you plan to split up.</p></section>
+    <section>${renderSchedDay(d)}</section>
+    <section><div class="slothead"><h3>Whole trip</h3><span class="eyebrow">picks made</span></div>
+    <div class="sched overview"><table><tbody>${totals.map(({x,got,n})=>`<tr><td class="day">${x.dow} ${x.label}</td><td>${esc(x.title)}</td><td style="font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap">${got} / ${n}</td><td><button class="btn" data-goto="${x.id}">Open</button></td></tr>`).join("")}</tbody></table></div></section>`;
+}
+function renderTrip(){
+  return `<section class="dayhead"><div class="eyebrow">Trip setup</div><h2>Who's going</h2>
+    <p class="lede">Arrival and departure dates decide which days each person appears on. Interests decide the “Fits” line on each option. Changes save for everyone.</p></section>
+    <section class="grid2">${travelers.map(t=>travCard(t)).join("")}
+      <div class="card trav"><h3>Add a traveler</h3><label for="newName">Name<input id="newName" placeholder="Name"></label><button class="btn primary" id="addTrav" ${db&&canWrite?"":"disabled"}>Add</button></div>
+    </section>
+    <section class="card"><h3>Trip rules</h3><ul class="rules">
+      <li>Rental car the whole trip. Arrive and leave via Keflavík (KEF).</li>
+      <li>No single drive over 3 hours once everyone is here; options that break it turn red.</li>
+      <li>Dinners high-end, breakfast and lunch average. Lodging up to about $700–800 a night for the right place.</li>
+      <li>Hot springs every day possible, but not the Blue Lagoon. No trip east for reindeer; you saw them in February.</li>
+      <li>Price marks: $ under $25 pp · $$ $25–80 · $$$ $80–200 · $$$$ above. Lodging: $$ under $300 · $$$ $300–600 · $$$$ $600+ a night. Rough October guides; check when booking.</li>
+    </ul></section>
+    <section class="card"><h3>Packing list for this forecast</h3>
+      <p class="lede" style="margin:0 0 8px">Highs 2–11 °C (36–52 °F), lows down to −2 °C (28 °F), two very wet days (Oct 8 and 12) and one dry, clear, cold one (Oct 10).</p>
+      <ul class="rules">
+        <li><b>Shell:</b> a fully waterproof, hooded jacket and rain pants each. This matters more than anything else on the list.</li>
+        <li><b>Warmth:</b> merino or synthetic base layers, a fleece or wool sweater, and a packable insulated jacket. No cotton next to the skin.</li>
+        <li><b>Feet:</b> waterproof hiking boots with grip, wool socks (several pairs), and city shoes that can take rain.</li>
+        <li><b>Small stuff:</b> beanie, gloves, buff or scarf, sunglasses for glacier glare, a quick-dry towel.</li>
+        <li><b>Water:</b> swimsuits (two each, so one can dry), flip-flops for the lagoons.</li>
+        <li><b>Nights:</b> one smart-casual outfit for the Michelin dinners, going-out clothes for Fri and Mon, and a thermos for aurora watching.</li>
+        <li><b>Leave home:</b> umbrellas (Icelandic wind breaks them) and jeans for anything outdoors.</li>
+      </ul></section>
+    <section class="card"><h3>Where these options came from</h3><p class="lede" style="margin:0">36 posts in your “Iceland 2026” Instagram collection, the GPS and dates from your Jan 31–Feb 9 ring-road photos (marked “Done Feb ’26”), current hours and prices from the venues' sites, and point forecasts from yr.no (Norwegian Meteorological Institute) for each area. The forecast refreshes whenever anyone opens the app and it is more than 3 hours old, plus once a day automatically. Aurora strength (Kp) comes from NOAA's Space Weather Prediction Center.</p></section>`;
+}
+function travCard(t){
+  const ints = Object.entries(INTERESTS).map(([k,v])=>`<button data-int="${k}" data-t="${esc(t.id)}" aria-pressed="${(t.interests||[]).includes(k)}">${v}</button>`).join("");
+  const f = (k,lab,type,val)=>`<label for="${k}-${esc(t.id)}">${lab}<input id="${k}-${esc(t.id)}" type="${type}" value="${esc(val||"")}" data-field="${k}" data-t="${esc(t.id)}" ${db&&canWrite?"":"disabled"}></label>`;
+  return `<div class="card trav"><div style="display:flex;align-items:center;gap:8px">${avatar(t,30)}<h3>${esc(t.name)}</h3>${t.age?`<span class="eyebrow">age ${esc(t.age)}</span>`:""}</div>
+    <div class="row">${f("name","Name","text",t.name)}${f("age","Age","number",t.age)}</div>
+    <div class="row">${f("arriveDate","Arrives","date",t.arriveDate)}${f("arriveTime","Time","time",t.arriveTime)}</div>
+    <div class="row">${f("departDate","Leaves","date",t.departDate)}${f("departTime","Time","time",t.departTime)}</div>
+    <div class="row">${f("arriveAt","Arrival airport","text",t.arriveAt)}${f("departAt","Departure airport","text",t.departAt)}</div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Interests</div><div class="ints">${ints}</div></div>
+    <div><button class="btn" data-remove="${esc(t.id)}" ${db&&canWrite?"":"disabled"}>Remove ${esc(t.name)}</button> <span class="eyebrow" id="rm-${esc(t.id)}"></span></div></div>`;
+}
+
+/* ---------- Writes ---------- */
+function setStatus(msg, err){ const s=$("#dbStatus"); s.hidden=!msg; s.textContent=msg||""; s.classList.toggle("err",!!err); }
+let CODE = null; try{ CODE = localStorage.getItem("ice26-code"); }catch(e){}
+async function api(path, opts={}){
+  const r = await fetch(path, {...opts, headers:{"content-type":"application/json","x-trip-code":CODE||"",...(opts.headers||{})}});
+  if(r.status===401){ lockOut(); throw {code:"auth"}; }
+  if(!r.ok) throw {code:"server", status:r.status};
+  return r.json();
+}
+async function writePick(day,slot,tid,optId){
+  const key = pickKey(day,slot,tid), prev = picks[key];
+  if(optId) picks[key]=optId; else delete picks[key];
+  render();
+  try{ await api("/api/pick",{method:"POST",body:JSON.stringify({day,slot,traveler:tid,option:optId||null})}); }
+  catch(e){ if(prev) picks[key]=prev; else delete picks[key]; handleErr(e); render(); }
+}
+function handleErr(e){
+  if(e && e.code==="auth") return;
+  setStatus("Couldn't save that change. Check your connection and try again.", true);
+}
+const pending = {};
+function saveTraveler(t){
+  clearTimeout(pending[t.id]);
+  pending[t.id] = setTimeout(async()=>{
+    try{ await api("/api/traveler",{method:"POST",body:JSON.stringify(t)}); }catch(e){ handleErr(e); }
+  },600);
+}
+
+/* ---------- Events ---------- */
+document.addEventListener("click", async ev=>{
+  const b = ev.target.closest("button,a"); if(!b) return;
+  if(b.dataset.day){ dayId=b.dataset.day; if(view==="trip") view="day"; persist(); render(); scrollTo({top:0}); return; }
+  if(b.id&&b.id.startsWith("tab-")){ view=b.id.slice(4); persist(); render(); return; }
+  if(b.dataset.goto){ dayId=b.dataset.goto; view="day"; persist(); render(); scrollTo({top:0}); return; }
+  if(!db||!canWrite) return;
+  if(b.dataset.pick){
+    const o=OPT[b.dataset.pick], tid=b.dataset.t;
+    const cur = picks[pickKey(o.day,o.slot,tid)];
+    await writePick(o.day,o.slot,tid, cur===o.id?null:o.id); return;
+  }
+  if(b.dataset.path){
+    const d=DAYS.find(x=>x.id===dayId), p=d.paths.find(x=>x.k===b.dataset.path);
+    const who = b.dataset.scope==="all" ? here(d.id).map(t=>t.id) : [me];
+    for(const tid of who) for(const [s,oid] of Object.entries(p.set)) await writePick(d.id,s,tid,oid);
+    return;
+  }
+  if(b.dataset.int){
+    const t=travelers.find(x=>x.id===b.dataset.t); if(!t) return;
+    const set=new Set(t.interests||[]); set.has(b.dataset.int)?set.delete(b.dataset.int):set.add(b.dataset.int);
+    t.interests=[...set]; render(); saveTraveler(t); return;
+  }
+  if(b.id==="addTrav"){
+    const name=$("#newName").value.trim(); if(!name) return;
+    let id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"t"; while(travelers.some(x=>x.id===id)) id+="2";
+    const used=travelers.map(x=>x.color); const color=PALETTE.find(c=>!used.includes(c))||PALETTE[travelers.length%PALETTE.length];
+    const t={id,name,age:"",interests:[],arriveDate:DAYS[0].id,departDate:DAYS[DAYS.length-1].id,arriveTime:"",departTime:"",arriveAt:"KEF",departAt:"KEF",color,order:travelers.length+1};
+    travelers.push(t); render();
+    try{ await api("/api/traveler",{method:"POST",body:JSON.stringify(t)}); await load(); }catch(e){ handleErr(e); } return;
+  }
+  if(b.dataset.remove){
+    const span=$("#rm-"+CSS.escape(b.dataset.remove));
+    if(b.dataset.confirm!=="1"){ b.dataset.confirm="1"; b.textContent="Tap again to remove"; return; }
+    try{ await api("/api/traveler?id="+encodeURIComponent(b.dataset.remove),{method:"DELETE"}); await load(); }catch(e){ handleErr(e); } return;
+  }
+});
+document.addEventListener("input", ev=>{
+  const i=ev.target; if(!i.dataset.field) return;
+  const t=travelers.find(x=>x.id===i.dataset.t); if(!t) return;
+  t[i.dataset.field]=i.value; saveTraveler(t);
+});
+document.addEventListener("change", ev=>{
+  if(ev.target.dataset.field) render();
+  if(ev.target.id==="meSel"){ me=ev.target.value||null; persist(); render(); }
+});
+function persist(){ try{ localStorage.setItem("ice26-view",view); localStorage.setItem("ice26-day",dayId); if(me) localStorage.setItem("ice26-me",me); else localStorage.removeItem("ice26-me"); }catch(e){} }
+
+/* ---------- Boot ---------- */
+function lockOut(){
+  CODE=null; try{ localStorage.removeItem("ice26-code"); }catch(e){}
+  $("#gate").hidden=false; $("#app").hidden=true;
+}
+async function load(){
+  const st = await api("/api/state");
+  travelers = st.travelers.sort((a,b)=>(a.order||0)-(b.order||0));
+  const next={}; st.picks.forEach(x=>{ next[pickKey(x.day,x.slot,x.traveler)]=x.option; }); picks=next;
+  if(st.weather) LIVE = st.weather;
+  refreshState = st.refreshing ? "refreshing now" : "";
+  if(me && !travelers.some(t=>t.id===me)) me=null;
+  setStatus(travelers.length?"":"No travelers yet. Add them on the Trip tab.");
+  const editing = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.field;
+  if(!editing) render(); else { renderStrip(); renderMe(); }
+  if(st.refreshing) setTimeout(()=>load().catch(()=>{}), 20000);
+}
+async function start(){
+  $("#gate").hidden=true; $("#app").hidden=false;
+  db = true; render();
+  try{ await load(); }catch(e){ if(e.code!=="auth") setStatus("Couldn't reach the trip server. Reload to try again.", true); }
+}
+setInterval(()=>{ if(CODE && document.visibilityState==="visible") load().catch(()=>{}); }, 20000);
+document.addEventListener("visibilitychange",()=>{ if(CODE && document.visibilityState==="visible") load().catch(()=>{}); });
+$("#gateForm").addEventListener("submit", async ev=>{
+  ev.preventDefault();
+  CODE = $("#code").value.trim();
+  try{ await api("/api/login"); try{ localStorage.setItem("ice26-code",CODE); }catch(e){} start(); }
+  catch(e){ $("#gateMsg").textContent = e.code==="auth" ? "That passcode didn't work." : "Couldn't reach the server."; $("#gate").hidden=false; $("#app").hidden=true; }
+});
+if(CODE) start(); else lockOut();
+</script>
+
+</body>
+</html>
