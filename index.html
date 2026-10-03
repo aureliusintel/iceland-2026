@@ -139,7 +139,7 @@ details.wear li{margin:2px 0}
 .trav{display:grid;gap:10px}
 .trav .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 label{font-size:12px;color:var(--muted);display:grid;gap:3px}
-input,select{font:inherit;font-size:14px;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;min-width:0}
+input,select{font:inherit;font-size:16px;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;min-width:0}
 .ints{display:flex;flex-wrap:wrap;gap:6px}
 .ints button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:3px 10px;font-size:12.5px;cursor:pointer}
 .ints button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -775,7 +775,7 @@ function renderTrip(){
   return `<section class="dayhead"><div class="eyebrow">Trip setup</div><h2>Who's going</h2>
     <p class="lede">Arrival and departure dates decide which days each person appears on. Interests decide the “Fits” line on each option. Changes save for everyone.</p></section>
     <section class="grid2">${travelers.map(t=>travCard(t)).join("")}
-      <div class="card trav"><h3>Add a traveler</h3><label for="newName">Name<input id="newName" placeholder="Name"></label><button class="btn primary" id="addTrav" ${db&&canWrite?"":"disabled"}>Add</button></div>
+      <div class="card trav"><h3>Add a traveler</h3><label for="newName">Name<input id="newName" placeholder="Name" value="${esc(newNameDraft)}" enterkeyhint="done"></label><button class="btn primary" id="addTrav" ${db&&canWrite?"":"disabled"}>Add</button></div>
     </section>
     <section class="card"><h3>Trip rules</h3><ul class="rules">
       <li>Rental car the whole trip. Arrive and leave via Keflavík (KEF).</li>
@@ -830,11 +830,32 @@ function handleErr(e){
   setStatus("Couldn't save that change. Check your connection and try again.", true);
 }
 const pending = {};
+let inflight = 0, needsRender = false, newNameDraft = "";
 function saveTraveler(t){
   clearTimeout(pending[t.id]);
   pending[t.id] = setTimeout(async()=>{
+    delete pending[t.id]; inflight++;
     try{ await api("/api/traveler",{method:"POST",body:JSON.stringify(t)}); }catch(e){ handleErr(e); }
+    finally{ inflight--; }
   },600);
+}
+// True while someone is typing or a traveler change hasn't reached the server yet.
+function isEditing(){
+  const a = document.activeElement;
+  const typing = a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName) && a.closest("#view");
+  return !!typing || inflight>0 || Object.keys(pending).length>0;
+}
+async function addTraveler(){
+  const name=newNameDraft.trim(); if(!name) return;
+  let id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"t"; while(travelers.some(x=>x.id===id)) id+="2";
+  const used=travelers.map(x=>x.color); const color=PALETTE.find(c=>!used.includes(c))||PALETTE[travelers.length%PALETTE.length];
+  const t={id,name,age:"",interests:[],arriveDate:DAYS[0].id,departDate:DAYS[DAYS.length-1].id,arriveTime:"",departTime:"",arriveAt:"KEF",departAt:"KEF",color,order:travelers.length+1};
+  travelers.push(t); newNameDraft=""; if(document.activeElement) document.activeElement.blur(); render();
+  inflight++;
+  try{ await api("/api/traveler",{method:"POST",body:JSON.stringify(t)}); setStatus(name+" added."); }
+  catch(e){ travelers=travelers.filter(x=>x.id!==id); newNameDraft=name; render(); handleErr(e); }
+  finally{ inflight--; }
+  load().catch(()=>{});
 }
 
 /* ---------- Events ---------- */
@@ -860,14 +881,7 @@ document.addEventListener("click", async ev=>{
     const set=new Set(t.interests||[]); set.has(b.dataset.int)?set.delete(b.dataset.int):set.add(b.dataset.int);
     t.interests=[...set]; render(); saveTraveler(t); return;
   }
-  if(b.id==="addTrav"){
-    const name=$("#newName").value.trim(); if(!name) return;
-    let id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"t"; while(travelers.some(x=>x.id===id)) id+="2";
-    const used=travelers.map(x=>x.color); const color=PALETTE.find(c=>!used.includes(c))||PALETTE[travelers.length%PALETTE.length];
-    const t={id,name,age:"",interests:[],arriveDate:DAYS[0].id,departDate:DAYS[DAYS.length-1].id,arriveTime:"",departTime:"",arriveAt:"KEF",departAt:"KEF",color,order:travelers.length+1};
-    travelers.push(t); render();
-    try{ await api("/api/traveler",{method:"POST",body:JSON.stringify(t)}); await load(); }catch(e){ handleErr(e); } return;
-  }
+  if(b.id==="addTrav"){ await addTraveler(); return; }
   if(b.dataset.remove){
     const span=$("#rm-"+CSS.escape(b.dataset.remove));
     if(b.dataset.confirm!=="1"){ b.dataset.confirm="1"; b.textContent="Tap again to remove"; return; }
@@ -875,12 +889,20 @@ document.addEventListener("click", async ev=>{
   }
 });
 document.addEventListener("input", ev=>{
-  const i=ev.target; if(!i.dataset.field) return;
+  const i=ev.target;
+  if(i.id==="newName"){ newNameDraft=i.value; return; }
+  if(!i.dataset.field) return;
   const t=travelers.find(x=>x.id===i.dataset.t); if(!t) return;
   t[i.dataset.field]=i.value; saveTraveler(t);
 });
+document.addEventListener("keydown", ev=>{
+  if(ev.target.id==="newName" && ev.key==="Enter"){ ev.preventDefault(); addTraveler(); }
+});
+document.addEventListener("focusout", ()=>{
+  setTimeout(()=>{ if(needsRender && !isEditing()){ needsRender=false; render(); } }, 250);
+});
 document.addEventListener("change", ev=>{
-  if(ev.target.dataset.field) render();
+  if(ev.target.dataset.field && ev.target.type!=="text" && ev.target.type!=="number") render();
   if(ev.target.id==="meSel"){ me=ev.target.value||null; persist(); render(); }
 });
 function persist(){ try{ localStorage.setItem("ice26-view",view); localStorage.setItem("ice26-day",dayId); if(me) localStorage.setItem("ice26-me",me); else localStorage.removeItem("ice26-me"); }catch(e){} }
@@ -892,14 +914,15 @@ function lockOut(){
 }
 async function load(){
   const st = await api("/api/state");
-  travelers = st.travelers.sort((a,b)=>(a.order||0)-(b.order||0));
+  const editing = isEditing();
+  // Never overwrite travelers someone is editing; picks and weather can always refresh.
+  if(!editing) travelers = st.travelers;
   const next={}; st.picks.forEach(x=>{ next[pickKey(x.day,x.slot,x.traveler)]=x.option; }); picks=next;
   if(st.weather) LIVE = st.weather;
   refreshState = st.refreshing ? "refreshing now" : "";
   if(me && !travelers.some(t=>t.id===me)) me=null;
   setStatus(travelers.length?"":"No travelers yet. Add them on the Trip tab.");
-  const editing = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.field;
-  if(!editing) render(); else { renderStrip(); renderMe(); }
+  if(!editing) render(); else { needsRender = true; }
   if(st.refreshing) setTimeout(()=>load().catch(()=>{}), 20000);
 }
 async function start(){
