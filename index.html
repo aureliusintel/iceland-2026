@@ -686,7 +686,7 @@ function renderDay(){
       <div class="eyebrow">${d.dow} ${d.label}, 2026 · ${esc(d.region)}</div>
       <h2>${esc(d.title)}</h2>
       <p class="lede">${esc(d.note)}</p>
-      <div class="facts"><span>Sunrise / sunset <b>${d.sun}</b></span><span>Drive rule <b>${fullGroup(d.id)?"≤ 3 h per drive":"none (before Eva arrives)"}</b></span></div>
+      <div class="facts"><span>Sunrise / sunset <b>${d.sun}</b></span><span>Drive rule <b>${fullGroup(d.id)?"3 h max per drive":"no limit, drive as far as you like"}</b></span></div>
       <div class="who">${ppl.length?ppl.map(t=>`<span class="chip">${avatar(t)}${esc(t.name)}</span>`).join(""):`<span class="empty">Add travelers on the Trip tab to see who's here.</span>`}</div>
       ${d.anchors.map(a=>`<div class="anchor"><time>${esc(a.t)}</time><span>${esc(a.x)}</span></div>`).join("")}
     </section>
