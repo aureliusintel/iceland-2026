@@ -33,3 +33,18 @@ insert into travelers (id, sort, data) values
  ('amanda', 2, '{"name":"Amanda","age":"48","color":"--amanda","interests":["nature","animals","horses","hiking","hotsprings","nightlife","dining","aurora","stays","coffee","shopping"],"arriveDate":"2026-10-07","arriveTime":"06:30","arriveAt":"KEF","departDate":"2026-10-13","departTime":"12:00","departAt":"KEF"}'),
  ('eva', 3, '{"name":"Eva","age":"21","color":"--eva","interests":["hiking","horses","sights","animals","nightlife","hotsprings","aurora","shopping","dining"],"arriveDate":"2026-10-09","arriveTime":"09:30","arriveAt":"KEF","departDate":"2026-10-13","departTime":"12:00","departAt":"KEF"}')
 on conflict (id) do nothing;
+-- Run once in Supabase → SQL Editor. Stores options created from new Instagram saves.
+create table if not exists custom_options (
+  id         text primary key,          -- ig-<post code>-<n>
+  day        text not null,
+  slot       text not null,
+  source_url text,
+  data       jsonb not null,
+  created_at timestamptz not null default now()
+);
+create table if not exists ig_seen (
+  url     text primary key,              -- Instagram post already checked
+  seen_at timestamptz not null default now()
+);
+alter table custom_options enable row level security;
+alter table ig_seen        enable row level security;

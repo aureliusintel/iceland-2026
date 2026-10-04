@@ -136,6 +136,18 @@ details.wear li{margin:2px 0}
 .cell .w{font-size:11.5px;color:var(--muted)}
 .gate{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
 .gatecard{display:grid;gap:12px;width:100%;max-width:360px}
+.area{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink);background:var(--sunk);border-radius:999px;padding:2px 10px 2px 7px;white-space:nowrap}
+.area i,.adot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.adot{margin-right:6px;vertical-align:baseline}
+.tag.new{background:var(--leaf);color:var(--moss);font-weight:700}
+.areabar{margin-top:16px}
+.achips{display:flex;flex-wrap:wrap;gap:6px}
+.achip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.achip span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.achip[aria-pressed="true"]{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+.achip[aria-pressed="true"] span{color:#fff}
+.achip .adot{margin-right:0}
+.mine-areas{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;margin-top:10px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0}
 .trav{display:grid;gap:10px}
@@ -814,13 +826,72 @@ function render(){
 function fitsFor(o, ppl){
   return ppl.filter(t=>(t.interests||[]).some(i=>o.tags.includes(i)));
 }
+
+/* ---------- Areas: which options sit near each other ---------- */
+const AREAS = {
+  rvk:      {name:"Reykjavík area",       color:"#4A5A68"},
+  kef:      {name:"Reykjanes / KEF",      color:"#8A5A3C"},
+  golden:   {name:"Golden Circle",        color:"#B58A00"},
+  hvera:    {name:"Hveragerði & Selfoss", color:"#D2602B"},
+  hella:    {name:"Hella & Seljalandsfoss", color:"#2D8A55"},
+  vik:      {name:"Skógar & Vík",         color:"#1F5C99"},
+  hvamm:    {name:"Hvalfjörður & Akranes", color:"#138F8C"},
+  husafell: {name:"Borgarfjörður",        color:"#7B4FB0"},
+  high:     {name:"Highlands",            color:"#9A3340"}
+};
+// rough drive minutes between areas
+const HOP = {"rvk-kef":45,"rvk-golden":60,"rvk-hvera":40,"rvk-hella":75,"rvk-vik":150,"rvk-hvamm":45,"rvk-husafell":100,"rvk-high":210,
+  "kef-golden":100,"kef-hvera":60,"kef-hella":110,"kef-vik":180,"kef-hvamm":80,"kef-husafell":140,"kef-high":250,
+  "golden-hvera":45,"golden-hella":50,"golden-vik":120,"golden-hvamm":90,"golden-husafell":150,"golden-high":120,
+  "hvera-hella":40,"hvera-vik":110,"hvera-hvamm":75,"hvera-husafell":130,"hvera-high":165,
+  "hella-vik":75,"hella-hvamm":110,"hella-husafell":160,"hella-high":170,
+  "vik-hvamm":190,"vik-husafell":230,"vik-high":240,"hvamm-husafell":75,"hvamm-high":210,"husafell-high":200};
+const hop = (a,b) => a===b ? 0 : (HOP[a+"-"+b] ?? HOP[b+"-"+a] ?? 120);
+const AREA_OVERRIDE = {m8d:"high", s8d:"high", d7c:null, bk08:null, bk10:null, bk11:null, bk12:null};
+function areaOf(o){
+  if(!o) return null;
+  if(o.area !== undefined) return o.area;
+  if(o.id in AREA_OVERRIDE) return AREA_OVERRIDE[o.id];
+  const k = (LK[o.id]||"").split(" ")[0];
+  return AREAS[k] ? k : null;
+}
+const areaPill = a => a ? `<span class="area"><i style="background:${AREAS[a].color}"></i>${esc(AREAS[a].name)}</span>` : "";
+const areaDot = a => a ? `<i class="adot" style="background:${AREAS[a].color}" title="${esc(AREAS[a].name)}"></i>` : "";
+function dayAreas(d, tid){
+  const out = [];
+  SLOTS.forEach(s=>picksOf(d.id,s.id,tid).forEach(id=>{ const a=areaOf(OPT[id]); if(a && !out.includes(a)) out.push(a); }));
+  return out;
+}
+function spreadNote(areas){
+  if(areas.length<2) return "";
+  let worst=[0,"",""];
+  for(let i=0;i<areas.length;i++) for(let j=i+1;j<areas.length;j++){ const h=hop(areas[i],areas[j]); if(h>worst[0]) worst=[h,areas[i],areas[j]]; }
+  if(worst[0]<=60) return `<span class="same">All close together (under an hour apart)</span>`;
+  if(worst[0]<=120) return `<span class="eyebrow" style="text-transform:none;letter-spacing:0">Longest hop about ${fmtDrive(worst[0])}: ${esc(AREAS[worst[1]].name)} ↔ ${esc(AREAS[worst[2]].name)}</span>`;
+  return `<span class="split">Far apart: ${esc(AREAS[worst[1]].name)} and ${esc(AREAS[worst[2]].name)} are about ${fmtDrive(worst[0])} apart</span>`;
+}
+const areaFilter = {};
+/* ---------- Options added from new Instagram saves (stored on the server) ---------- */
+function mergeCustom(list){
+  (list||[]).forEach(c=>{
+    if(!c || !c.id || OPT[c.id]) return;
+    const d = DAYS.find(x=>x.id===c.day); if(!d || !SLOTS.some(s=>s.id===c.slot)) return;
+    const o = {id:c.id,t:c.t,where:c.where||"",tags:c.tags||[],p:c.p||"",d:c.d||"",drive:+c.drive||0,road:c.road||"",from:c.from||"",
+      area: AREAS[c.area]?c.area:null, fresh:true, ...(c.warn?{warn:c.warn}:{}), ...(c.saved&&c.saved.url?{saved:c.saved}:{})};
+    LK[o.id] = ((c.area==="high"?"golden":(AREAS[c.area]?c.area:"rvk"))+" "+(c.kind||"city"));
+    (d.opts[c.slot] ||= []).push(o);
+    OPT[o.id] = {...o, slot:c.slot, day:d.id};
+  });
+}
 function renderOpt(o, d, ppl){
   const [loc,kind] = (LK[o.id]||"rvk city").split(" ");
   const w = wxFor(loc, d.id); const wr = wear(kind, w); const flag = wxFlag(kind, w);
   const over = o.drive>MAX_DRIVE && fullGroup(d.id);
   const mineSel = me && hasPick(d.id,o.slot,me,o.id);
   const fits = fitsFor(o, ppl);
-  return `<article class="opt ${mineSel?"mine":""}">
+  const ar = areaOf(o);
+  return `<article class="opt ${mineSel?"mine":""}" data-area="${ar||""}">
+    ${ar||o.fresh?`<div class="meta">${areaPill(ar)}${o.fresh?`<span class="tag new">New from your saves</span>`:""}</div>`:""}
     <div class="meta">
       ${o.drive?`<span class="sign ${over?"over":""}" title="Drive from ${esc(o.from||"")}">${esc(o.road||"")} · ${fmtDrive(o.drive)}${o.from?" from "+esc(o.from):""}</span>`:""}
       ${o.p?`<span class="price">${esc(o.p)}</span>`:""}
@@ -865,17 +936,31 @@ function renderDay(){
           <div class="acts"><button class="btn ${building[d.id]?"":"primary"}" data-build="${d.id}" aria-expanded="${!!building[d.id]}">${building[d.id]?"Hide the options":"Start building"}</button></div></div>
       </div>
     </section>
-    ${building[d.id] ? SLOTS.filter(s=>d.opts[s.id]).map(s=>`<section class="slot"><div class="slothead"><h3>${s.name}</h3><span class="eyebrow">${SLOT_KIND[s.id]} · ${SINGLE[s.id]?"pick one":"pick as many as you like"} · ${s.time}</span></div>
-      <div class="opts">${d.opts[s.id].map(o=>renderOpt(OPT[o.id],d,ppl)).join("")}</div></section>`).join("")
+    ${building[d.id] ? renderAreaBar(d, mt) + SLOTS.filter(s=>d.opts[s.id]).map(s=>{
+      const list = d.opts[s.id].filter(o=>!areaFilter[d.id] || areaOf(OPT[o.id])===areaFilter[d.id] || !areaOf(OPT[o.id]));
+      return `<section class="slot"><div class="slothead"><h3>${s.name}</h3><span class="eyebrow">${SLOT_KIND[s.id]} · ${SINGLE[s.id]?"pick one":"pick as many as you like"} · ${s.time}</span></div>
+      <div class="opts">${list.length?list.map(o=>renderOpt(OPT[o.id],d,ppl)).join(""):`<p class="empty" style="margin:0">Nothing in this area for this part of the day.</p>`}</div></section>`;}).join("")
       + `<section class="slot"><button class="btn primary" data-build="${d.id}" data-done="1">Done building</button></section>`
       : renderMyDay(d, mt)}`;
+}
+function renderAreaBar(d, mt){
+  const counts = {};
+  Object.values(d.opts).flat().forEach(o=>{ const a=areaOf(OPT[o.id]); if(a) counts[a]=(counts[a]||0)+1; });
+  const mine = mt && present(mt,d.id) ? dayAreas(d, mt.id) : [];
+  const chip = (a,label,n) => `<button class="achip" data-area-filter="${a}" aria-pressed="${(areaFilter[d.id]||"")===a}">${a?areaDot(a):""}${esc(label)}${n!=null?` <span>${n}</span>`:""}</button>`;
+  return `<section class="slot areabar"><div class="eyebrow" style="margin-bottom:6px">Show options near</div>
+    <div class="achips">${chip("","Everywhere")}${Object.keys(AREAS).filter(a=>counts[a]).map(a=>chip(a,AREAS[a].name,counts[a])).join("")}</div>
+    ${mine.length?`<div class="mine-areas">${esc(mt.name)}'s picks today: ${mine.map(a=>areaPill(a)).join(" ")} ${spreadNote(mine)}</div>`:""}
+  </section>`;
 }
 const SLOT_KIND = {morning:"Breakfast & activities", midday:"Lunch or activity", afternoon:"Activity", dinner:"Dinner", evening:"Night out", stay:"Where to sleep"};
 function renderMyDay(d, mt){
   if(!mt || !present(mt,d.id)) return `<section class="slot"><p class="empty" style="margin:0">${mt?esc(mt.name)+" isn't here this day.":"Choose who you are at the top to see your day."}</p></section>`;
   const rows = SLOTS.filter(s=>d.opts[s.id]).map(s=>{ const os = picksOf(d.id,s.id,mt.id).map(id=>OPT[id]).filter(Boolean);
-    return `<tr><td class="slotc">${s.name}<span>${s.time}</span></td><td>${os.length?`<div class="cell" style="gap:6px">${os.map(o=>`<div><b>${esc(o.t)}</b><br><small>${esc(o.where||"")}</small></div>`).join("")}</div>`:`<span class="empty">Not picked yet</span>`}</td></tr>`; }).join("");
+    return `<tr><td class="slotc">${s.name}<span>${s.time}</span></td><td>${os.length?`<div class="cell" style="gap:6px">${os.map(o=>`<div>${areaDot(areaOf(o))}<b>${esc(o.t)}</b><br><small>${esc(o.where||"")}</small></div>`).join("")}</div>`:`<span class="empty">Not picked yet</span>`}</td></tr>`; }).join("");
+  const ma = dayAreas(d, mt.id);
   return `<section class="slot"><div class="slothead"><h3>${esc(mt.name)}'s day</h3><span class="eyebrow">your picks</span></div>
+    ${ma.length?`<div class="mine-areas" style="margin-bottom:10px">${ma.map(a=>areaPill(a)).join(" ")} ${spreadNote(ma)}</div>`:""}
     <div class="sched"><table style="min-width:0"><tbody>${rows}</tbody></table></div></section>`;
 }
 
@@ -937,7 +1022,7 @@ function renderSchedDay(d){
       return `<td><div class="cell" style="gap:8px">${os.map(o=>{
         const [loc,kind]=(LK[o.id]||"rvk city").split(" "); const w=wxFor(loc,d.id); const wr=wear(kind,w);
         const wl = (kind!=="stay"&&kind!=="rest"?`${w.hi}°/${w.lo}°C, ${w.mm!=null?w.mm+" mm":"avg"}`:"") + (wr?" · Wear: "+wr.slice(0,3).join(", "):"");
-        return `<div class="cell"><b>${esc(o.t)}</b><small>${esc(o.where||"")}${o.drive?" · "+fmtDrive(o.drive):""}</small>${wl?`<span class="w">${esc(wl)}</span>`:""}</div>`;
+        return `<div class="cell"><b>${areaDot(areaOf(o))}${esc(o.t)}</b><small>${esc(o.where||"")}${o.drive?" · "+fmtDrive(o.drive):""}</small>${wl?`<span class="w">${esc(wl)}</span>`:""}</div>`;
       }).join("")}</div></td>`;
     }).join("")}</tr>`;
   }).join("");
@@ -1044,6 +1129,7 @@ document.addEventListener("click", async ev=>{
   const b = ev.target.closest("button,a"); if(!b) return;
   if(b.dataset.day){ dayId=b.dataset.day; if(view==="trip") view="day"; persist(); render(); scrollTo({top:0}); return; }
   if(b.id&&b.id.startsWith("tab-")){ view=b.id.slice(4); persist(); render(); return; }
+  if(b.dataset.areaFilter!==undefined){ areaFilter[dayId]=b.dataset.areaFilter||""; render(); return; }
   if(b.dataset.build){
     const id=b.dataset.build; building[id]=!building[id]; render();
     if(building[id]) document.querySelector(".slot")?.scrollIntoView({behavior:"smooth",block:"start"});
@@ -1108,6 +1194,7 @@ async function load(){
   const next={}; st.picks.forEach(x=>{ const k=pickKey(x.day,x.slot,x.traveler); (next[k] ||= []).includes(x.option) || next[k].push(x.option); });
   if(!inflight) picks=next;  // don't clobber a pick that's still saving
   if(st.weather) LIVE = st.weather;
+  if(st.options) mergeCustom(st.options);
   refreshState = st.refreshing ? "refreshing now" : "";
   if(me && !travelers.some(t=>t.id===me)) me=null;
   setStatus(travelers.length?"":"No travelers yet. Add them on the Trip tab.");
